@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:dni_test_gen/main.dart';
 import 'package:dni_test_gen/services/data_generator_service.dart';
-import 'package:dni_test_gen/models/identity.dart';
 
 void main() {
   group('Feature 06: Integration Tests', () {

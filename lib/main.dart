@@ -135,7 +135,7 @@ class MainScreen extends StatelessWidget {
           children: [
             // Tipo de DNI
             DropdownButtonFormField<DniType>(
-              value: state.selectedType,
+              initialValue: state.selectedType,
               decoration: const InputDecoration(labelText: 'Tipo de Documento'),
               items: const [
                 DropdownMenuItem(value: DniType.oldVersion, child: Text('Versión Vieja (PDF417)')),
