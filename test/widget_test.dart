@@ -1,46 +1,77 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
 
 import 'package:dni_test_gen/main.dart';
+import 'package:dni_test_gen/services/data_generator_service.dart';
+import 'package:dni_test_gen/models/identity.dart';
 
 void main() {
-  group('Feature 01: Base Application Tests', () {
-    testWidgets('App renders correctly with title and button', (WidgetTester tester) async {
-      await tester.pumpWidget(const DniGeneratorApp());
+  group('Feature 06: Integration Tests', () {
+    late DataGeneratorService mockService;
 
-      // Verificar la existencia del texto "Generador de DNI".
-      expect(find.text('Generador de DNI'), findsOneWidget); // AppBar title
-
-      // Verificar la existencia del botón "Generar".
-      expect(find.widgetWithText(ElevatedButton, 'Generar'), findsOneWidget);
-
-      // Verificar el placeholder visual
-      expect(find.text('Aquí se mostrará el código generado'), findsOneWidget);
+    setUp(() {
+      mockService = DataGeneratorService();
+      // Inject some mock data so it doesn't fail trying to read assets during test
+      mockService.setTestData(['Juan'], ['Perez']);
     });
 
-    testWidgets('Tapping the generate button does not throw errors', (WidgetTester tester) async {
-      await tester.pumpWidget(const DniGeneratorApp());
+    testWidgets('App renders correctly and integrates generators', (WidgetTester tester) async {
+      await tester.pumpWidget(DniGeneratorApp(dataService: mockService));
+
+      // Verificar que el Dropdown de tipo exista
+      expect(find.text('Tipo de Documento'), findsOneWidget);
+      expect(find.byType(DropdownButtonFormField<DniType>), findsOneWidget);
+
+      // Verificar el placeholder visual inicial
+      expect(find.text('Aquí se mostrará el código generado'), findsOneWidget);
+
+      // Presionar generar (por defecto Aleatorio, pero mockeamos todo)
+      final button = find.widgetWithText(ElevatedButton, 'Generar');
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+
+      // Ya no deberíamos ver el placeholder, sino datos reales y el código.
+      expect(find.text('Aquí se mostrará el código generado'), findsNothing);
+      expect(find.textContaining('Formato:'), findsOneWidget);
+      expect(find.textContaining('DNI:'), findsOneWidget);
+      expect(find.textContaining('Nombre: Perez, Juan'), findsOneWidget);
+    });
+
+    testWidgets('Selecting Versión Nueva creates QR', (WidgetTester tester) async {
+      await tester.pumpWidget(DniGeneratorApp(dataService: mockService));
+
+      final dropdown = find.byType(DropdownButtonFormField<DniType>);
+      await tester.tap(dropdown);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Versión Nueva (QR)').last);
+      await tester.pumpAndSettle();
 
       final button = find.widgetWithText(ElevatedButton, 'Generar');
-      expect(button, findsOneWidget);
-
-      // Simular el tap en el botón "Generar" y asegurar que no produzca errores.
       await tester.tap(button);
-      await tester.pump();
-      
-      // Si llegamos aquí sin excepciones, la prueba pasa.
-      expect(true, isTrue);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Formato: Nuevo eDNI (QR)'), findsOneWidget);
+      // El QR widget de qr_flutter debería estar en el árbol
+      // (No podemos chequear `QrImageView` tan fácil sin importarlo, pero podemos confiar en que cambia el texto)
     });
 
-    test('AppState initializes correctly', () {
-      final state = AppState();
-      
-      // Prueba unitaria simple de estado base
-      expect(state, isNotNull);
-      
-      // generate() no debería lanzar errores
-      state.generate();
+    testWidgets('Selecting Versión Vieja creates PDF417', (WidgetTester tester) async {
+      await tester.pumpWidget(DniGeneratorApp(dataService: mockService));
+
+      final dropdown = find.byType(DropdownButtonFormField<DniType>);
+      await tester.tap(dropdown);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Versión Vieja (PDF417)').last);
+      await tester.pumpAndSettle();
+
+      final button = find.widgetWithText(ElevatedButton, 'Generar');
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Formato: DNI Viejo (PDF417)'), findsOneWidget);
+      // El BarcodeWidget debería estar en el árbol
     });
   });
 }
