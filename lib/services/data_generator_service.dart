@@ -13,8 +13,11 @@ class DataGeneratorService {
     if (_isLoaded) return;
     
     try {
-      final namesString = await rootBundle.loadString('assets/names.json');
-      final surnamesString = await rootBundle.loadString('assets/surnames.json');
+      final namesData = await rootBundle.load('assets/names.json');
+      final surnamesData = await rootBundle.load('assets/surnames.json');
+
+      final namesString = utf8.decode(namesData.buffer.asUint8List());
+      final surnamesString = utf8.decode(surnamesData.buffer.asUint8List());
 
       final List<dynamic> namesJson = json.decode(namesString);
       final List<dynamic> surnamesJson = json.decode(surnamesString);

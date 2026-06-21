@@ -1,21 +1,21 @@
-# Feature 02: Modelos de Datos y Generador Aleatorio
+# Feature 02: Data Models and Random Generator
 
-## Descripción
-Implementar la lógica para leer y procesar diccionarios de datos en formato JSON para nombres y apellidos. Crear un servicio que sea capaz de generar aleatoriamente un conjunto de datos ficticios (nombre, apellido, fecha de nacimiento, sexo, número de trámite, ejemplar) y un número de DNI dentro de un rango especificado.
+## Description
+Implement the logic to read and process data dictionaries in JSON format for names and surnames. Create a service capable of randomly generating a fictitious data set (name, surname, date of birth, gender, procedure number, copy letter) and a DNI number within a specified range.
 
-## Criterios de Aceptación
-1. Deben existir dos archivos JSON en `assets/` (o generados en memoria/mock) que contengan listas de nombres y apellidos.
-2. El sistema debe poder leer y deserializar los archivos JSON al iniciar.
-3. Crear un servicio `DataGeneratorService` que provea la función de generar una "Identidad" aleatoria.
-4. La generación del DNI debe aceptar como parámetros un valor mínimo y máximo.
-5. El sexo debe ser seleccionado aleatoriamente entre 'M', 'F' o 'X'.
-6. El ejemplar debe ser generado aleatoriamente (ej. 'A', 'B', 'C').
-7. El número de trámite debe ser de 9 dígitos.
+## Acceptance Criteria
+1. Two JSON files must exist in `assets/` (or generated in memory/mock) containing lists of names and surnames.
+2. The system must be able to read and deserialize the JSON files upon startup.
+3. Create a `DataGeneratorService` service that provides the function to generate a random "Identity".
+4. DNI generation must accept a minimum and maximum value as parameters.
+5. The gender must be randomly selected among 'M', 'F', or 'X'.
+6. The copy letter (ejemplar) must be randomly generated (e.g., 'A', 'B', 'C').
+7. The procedure number (número de trámite) must be exactly 9 digits long.
 
-## Pruebas Necesarias
-- **Pruebas Unitarias:**
-  - Validar que el parsing de los JSON devuelva listas no vacías.
-  - Asegurar que la función de generación aleatoria devuelve nombres y apellidos pertenecientes al JSON.
-  - Validar que el DNI generado respeta los límites mínimo y máximo ingresados.
-  - Comprobar que los campos como `sexo` y `ejemplar` se generan con valores permitidos.
-  - Verificar que el número de trámite generado tiene exactamente 9 dígitos.
+## Required Tests
+- **Unit Tests:**
+  - Validate that parsing the JSONs returns non-empty lists.
+  - Ensure the random generation function returns names and surnames belonging to the JSON.
+  - Validate that the generated DNI respects the input minimum and maximum limits.
+  - Check that fields like `sexo` (gender) and `ejemplar` (copy letter) are generated with allowed values.
+  - Verify that the generated procedure number is exactly 9 digits long.

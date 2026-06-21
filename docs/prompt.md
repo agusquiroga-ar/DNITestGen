@@ -1,36 +1,36 @@
-## El pedido
+## The Request
 
-Como anailsta functional debes entender y definir como debe funcionar una aplicion que tiene por objetivo generar aleatoriamente codigos QR y debarras de documentos nacionales de identidad.
+As a functional analyst, you must understand and define how an application should work whose goal is to randomly generate QR codes and barcodes for national identity documents.
 
-### Resultado
+### Result
 
-El resultado de tu analisis debe ser un documento en formato markdown que defina las funcionalides que debe tener la aplicacion. Un documento funcional.
+The result of your analysis must be a markdown document that defines the functionalities the application must have. A functional document.
 
-### Objetivo de la aplicacion
+### Application Goal
 
-Generar de forma aleatoria los codigos de barras y qr que tienen los documentos nacionales de identidad argentinos (DNI). En argentina hoy dos tipos de documentos (los nuevos y los viejos), los nuevos poseen un codigo QR, los viejos un codigo de barras.
+Randomly generate the barcodes and QR codes found on the Argentine National Identity Documents (DNI). In Argentina today there are two types of documents (the new ones and the old ones), the new ones have a QR code, the old ones have a barcode.
 
-La aplicacion debe tener un boton que permita generar aleatoriamente estos codigos, cada vez que se presiona el boton se genera uno de estos y mostrarlo en pantalla.
+The application must have a button that allows randomly generating these codes, each time the button is pressed one of these is generated and displayed on the screen.
 
-### Especificacion de los codigos
+### Code Specification
 
-En argentina hoy dos tipos de documentos (los nuevos y los viejos), los nuevos poseen un codigo QR, los viejos un codigo de barras.
+In Argentina today there are two types of documents (the new ones and the old ones), the new ones have a QR code, the old ones have a barcode.
 
-En este documento tienes la especificacion de [new_dni_spec.md](file;file:///c%3A/dev/DNITestGen/docs/new_dni_spec.md) como generar el codigo de barras que contiene el DNI version vieja.
+In this document you have the specification of [old_dni_spec.md](file:///c:/dev/DNITestGen/docs/old_dni_spec.md) on how to generate the barcode that contains the old version DNI.
 
-En este documento esta la especificacion de como se genera el codigo QR de la nueva version de los documentos [dni_qr_pdf417_spec.md](file;file:///c%3A/dev/DNITestGen/docs/dni_qr_pdf417_spec.md)
+In this document is the specification of how the QR code of the new version of the documents is generated [new_dni_spec.md](file:///c:/dev/DNITestGen/docs/new_dni_spec.md)
 
-### Pantalla de inicio de la aplicacion
+### Application Home Screen
 
-Debe poseer un boton "Generar" que al presionarlo genere un codigo aleatorio. Debajo del boton se debe ver una seccion de parametria para configurar como se va a generar el boton.
+It must have a "Generate" button that, when pressed, generates a random code. Below the button, there must be a parameterization section to configure how the generation will behave.
 
-La parametria debe permir configurar:
+The parameterization must allow configuring:
 
-- El tipo de DNI a generar: version vieja, version nueva o aleatorio (cualquiera de los dos)
-- El rango del numero de documento (minimo y maximo)
+- The type of DNI to generate: old version, new version, or random (either of the two)
+- The document number range (minimum and maximum)
 
-### Consideraciones
+### Considerations
 
-1. Los nombres y apellidos se tienen que tomar de un diccionario de datos, que contiene la aplicacion en formato JSON. Uno para nombres y otro para apellidos.
-2. La aplicacion tiene debe construirse con Flutter
-3. La aplicacion debe correr en windows
+1. Names and surnames must be taken from a data dictionary, which the application contains in JSON format. One for names and another for surnames.
+2. The application must be built with Flutter
+3. The application must run on Windows

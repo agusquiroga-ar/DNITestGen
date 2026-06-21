@@ -1,18 +1,18 @@
-# Feature 03: Parametría en Interfaz de Usuario
+# Feature 03: User Interface Parameters
 
-## Descripción
-Agregar una sección de configuración en la pantalla principal, ubicada debajo del botón "Generar". Esta parametria permitirá al usuario definir qué tipo de documento desea generar (Versión Vieja, Versión Nueva, Aleatorio) y establecer el rango numérico (min y max) para el DNI generado.
+## Description
+Add a configuration section on the main screen, located below the "Generate" button. These parameters will allow the user to define what type of document they want to generate (Old Version, New Version, Random) and set the numerical range (min and max) for the generated DNI.
 
-## Criterios de Aceptación
-1. Implementar un selector (dropdown o radio buttons) con tres opciones: "Versión Vieja", "Versión Nueva" y "Aleatorio".
-2. Implementar dos campos de entrada de texto (TextFormField) para "DNI Mínimo" y "DNI Máximo".
-3. Validar que los campos de mínimo y máximo solo acepten números enteros.
-4. Validar que el valor mínimo no sea mayor al máximo.
-5. Conectar estos parámetros con el estado global para que estén disponibles cuando se presione el botón "Generar".
+## Acceptance Criteria
+1. Implement a selector (dropdown or radio buttons) with three options: "Old Version", "New Version", and "Random".
+2. Implement two text input fields (TextFormField) for "Minimum DNI" and "Maximum DNI".
+3. Validate that the minimum and maximum fields only accept integers.
+4. Validate that the minimum value is not greater than the maximum.
+5. Connect these parameters with the global state so they are available when the "Generate" button is pressed.
 
-## Pruebas Necesarias
-- **Pruebas de Widgets:**
-  - Verificar que los selectores de tipo de DNI existan en pantalla.
-  - Comprobar que los campos numéricos existen y limitan el ingreso a solo dígitos.
-  - Simular el llenado de los campos mínimo y máximo y verificar la validación (ej. min > max lanza error en UI).
-- **Prueba de Integración:** Verificar que al cambiar los parámetros en la UI, el estado de la aplicación se actualiza con los valores correctos.
+## Required Tests
+- **Widget Tests:**
+  - Verify that the DNI type selectors exist on the screen.
+  - Check that the numeric fields exist and restrict input to digits only.
+  - Simulate filling the minimum and maximum fields and verify validation (e.g., min > max throws a UI error).
+- **Integration Test:** Verify that changing the parameters in the UI updates the application state with the correct values.

@@ -1,19 +1,19 @@
-# Feature 01: Configuración Base de la Aplicación
+# Feature 01: Base Application Configuration
 
-## Descripción
-Crear la estructura base de la aplicación Flutter con soporte para Windows. Implementar la pantalla principal con un botón "Generar" y un área de visualización (placeholder) donde se mostrarán los códigos en el futuro. Establecer el patrón de gestión de estado (por ejemplo, Provider, Riverpod o BLoC).
+## Description
+Create the base structure of the Flutter application with Windows support. Implement the main screen with a "Generate" button and a display area (placeholder) where the codes will be shown in the future. Establish the state management pattern (e.g., Provider, Riverpod, or BLoC).
 
-## Criterios de Aceptación
-1. La aplicación debe poder compilarse y ejecutarse correctamente en Windows (`flutter run -d windows`).
-2. La pantalla principal debe contener un título "Generador de DNI".
-3. Debe existir un botón etiquetado "Generar".
-4. Debe existir un contenedor debajo del botón que actúe como un placeholder (área de visualización vacía).
-5. Se debe integrar un sistema de gestión de estado básico, preparado para las siguientes características.
+## Acceptance Criteria
+1. The application must compile and run successfully on Windows (`flutter run -d windows`).
+2. The main screen must contain a title "DNI Generator" (Generador de DNI).
+3. There must be a button labeled "Generate" (Generar).
+4. There must be a container below the button acting as a placeholder (empty display area).
+5. A basic state management system must be integrated, prepared for the upcoming features.
 
-## Pruebas Necesarias
-- **Prueba Unitaria:** Verificar que el estado inicial de la aplicación se carga correctamente.
-- **Prueba de Widgets:** 
-  - Verificar la existencia del texto "Generador de DNI".
-  - Verificar la existencia del botón "Generar".
-  - Simular el tap en el botón "Generar" y asegurar que no produzca errores.
-- **Prueba de Integración:** Verificar que la app inicia correctamente en el entorno de Windows sin excepciones.
+## Required Tests
+- **Unit Test:** Verify that the initial state of the application loads correctly.
+- **Widget Test:**
+  - Verify the existence of the text "DNI Generator".
+  - Verify the existence of the "Generate" button.
+  - Simulate a tap on the "Generate" button and ensure it does not produce errors.
+- **Integration Test:** Verify that the app starts correctly in the Windows environment without exceptions.

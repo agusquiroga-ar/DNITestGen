@@ -1,39 +1,34 @@
-# Especificación de Formatos de Códigos en antiguo DNI Argentino
+# Code Formats Specification in Old Argentine DNI
 
-Este documento detalla las especificaciones técnicas de los códigos bidimensionales presentes en las distintas variantes del antiguo
-
-
-
-Documento Nacional de Identidad (DNI) de la República Argentina, incluyendo su estructura de datos, campos y ejemplos de normalización para desarrolladores.
+This document details the technical specifications of the two-dimensional codes present in the different variants of the old National Identity Document (DNI) of the Argentine Republic, including its data structure, fields, and normalization examples for developers.
 
 ---
 
-## 1. Código de Barras Bidimensional Físico (PDF417)
+## 1. Physical Two-Dimensional Barcode (PDF417)
 
-Aunque comúnmente denominado "código QR", el reverso de la mayoría de las tarjetas físicas de DNI vigentes (emitidas desde el año 2012) utiliza la tecnología de código de barras bidimensional apilado **PDF417**.
+Although commonly referred to as a "QR code", the back of most physical DNI cards in force (issued since 2012) uses **PDF417** stacked two-dimensional barcode technology.
 
-### Formato del String Escaneado
+### Scanned String Format
 
-Al escanear el código PDF417 utilizando lectores ópticos (en modo emulación de teclado) o mediante procesamiento de imágenes, se obtiene una cadena de caracteres ASCII delimitada por el carácter `@`.
+When scanning the PDF417 code using optical readers (in keyboard emulation mode) or through image processing, an ASCII character string delimited by the `@` character is obtained.
 
-### Estructura de Campos (Índices Estándar)
+### Field Structure (Standard Indices)
 
-Al separar la cadena resultante usando `@` (`split('@')`), se obtiene un arreglo cuyos índices contienen la siguiente información:
+When splitting the resulting string using `@` (`split('@')`), an array is obtained whose indices contain the following information:
 
+| Index | Field                     | Format                            | Description                                                  |
+| :---- | :------------------------ | :-------------------------------- | :----------------------------------------------------------- |
+| **0** | Procedure Number          | Numeric (9 or 11 digits)          | Unique identifier of the physical document issuance.         |
+| **1** | Surnames                  | Uppercase text                    | Cardholder's surnames.                                       |
+| **2** | Names                     | Uppercase text                    | Cardholder's names.                                          |
+| **3** | Gender                    | Character (`M`, `F`, `X`)         | Registered gender.                                           |
+| **4** | DNI                       | Numeric (7 or 8 digits)           | ID number (without periods).                                 |
+| **5** | Copy Letter               | Character (`A`, `B`, `C`, etc.)   | Version/copy of the document.                                |
+| **6** | Date of Birth             | `DD/MM/YYYY`                      | Cardholder's date of birth.                                  |
+| **7** | Date of Issue             | `DD/MM/YYYY`                      | Date the copy was issued.                                    |
+| **8** | Control Code / CUIL       | Numeric / Variable                | Internal information or identifying fragment of the CUIL.    |
 
-| Índice | Campo                     | Formato                         | Descripción                                               |
-| :-------- | :-------------------------- | :-------------------------------- | :----------------------------------------------------------- |
-| **0**   | Número de Trámite       | Numérico (9 u 11 dígitos)     | Identificador único de la emisión del documento físico. |
-| **1**   | Apellidos                 | Texto en mayúsculas            | Apellidos del titular.                                     |
-| **2**   | Nombres                   | Texto en mayúsculas            | Nombres del titular.                                       |
-| **3**   | Sexo                      | Carácter (`M`, `F`, `X`)       | Género registrado.                                        |
-| **4**   | DNI                       | Numérico (7 u 8 dígitos)      | Número de documento (sin puntos).                         |
-| **5**   | Ejemplar                  | Carácter (`A`, `B`, `C`, etc.) | Versión/copia del documento.                              |
-| **6**   | Fecha de Nacimiento       | `DD/MM/AAAA`                    | Fecha de nacimiento del titular.                           |
-| **7**   | Fecha de Emisión         | `DD/MM/AAAA`                    | Fecha en la que se emitió el ejemplar.                    |
-| **8**   | Código de Control / CUIL | Numérico / Variable            | Información interna o fragmento identificador del CUIL.   |
-
-#### Ejemplo de Cadena Cruda:
+#### Raw String Example:
 
 ```text
 00112233445@PEREZ@JUAN CARLOS@M@30123456@A@25/12/1985@15/10/2020@200
@@ -41,17 +36,17 @@ Al separar la cadena resultante usando `@` (`split('@')`), se obtiene un arreglo
 
 ---
 
-## 2. Lectura y Normalización de Datos
+## 2. Data Reading and Normalization
 
-A continuación se presentan ejemplos en JavaScript y Python para parsear y normalizar la cadena del código PDF417.
+Below are examples in JavaScript and Python to parse and normalize the PDF417 code string.
 
-### Implementación en JavaScript / TypeScript
+### JavaScript / TypeScript Implementation
 
 ```javascript
 /**
- * Parsea y normaliza la cadena de texto de un DNI argentino (PDF417).
- * @param {string} rawText - Cadena de texto decodificada del código de barras.
- * @returns {object|null} Objeto con los datos del DNI normalizados o null.
+ * Parses and normalizes the text string of an Argentine DNI (PDF417).
+ * @param {string} rawText - Decoded text string from the barcode.
+ * @returns {object|null} Object with normalized DNI data or null.
  */
 function parsearDniPdf417(rawText) {
   if (!rawText) return null;
@@ -59,10 +54,10 @@ function parsearDniPdf417(rawText) {
   const fields = rawText.trim().split('@');
   
   if (fields.length < 8) {
-    throw new Error("El formato del texto escaneado no coincide con el estándar del DNI argentino.");
+    throw new Error("The format of the scanned text does not match the Argentine DNI standard.");
   }
   
-  // Convierte DD/MM/AAAA a formato estándar ISO YYYY-MM-DD
+  // Converts DD/MM/YYYY to standard ISO YYYY-MM-DD format
   const parseFecha = (fechaStr) => {
     if (!fechaStr) return null;
     const parts = fechaStr.split('/');
@@ -77,7 +72,7 @@ function parsearDniPdf417(rawText) {
     apellido: fields[1].trim(),
     nombre: fields[2].trim(),
     sexo: fields[3].trim().toUpperCase(),
-    dni: parseInt(fields[4].trim(), 10).toString(), // Remueve ceros a la izquierda innecesarios
+    dni: parseInt(fields[4].trim(), 10).toString(), // Removes unnecessary leading zeros
     ejemplar: fields[5].trim().toUpperCase(),
     fechaNacimiento: parseFecha(fields[6].trim()),
     fechaEmision: parseFecha(fields[7].trim()),
@@ -85,7 +80,7 @@ function parsearDniPdf417(rawText) {
 }
 ```
 
-### Implementación en Python
+### Python Implementation
 
 ```python
 from datetime import datetime
@@ -93,7 +88,7 @@ from typing import Optional, Dict
 
 def parsear_dni_pdf417(raw_text: str) -> Optional[Dict[str, str]]:
     """
-    Parsea y normaliza la cadena de texto de un DNI argentino (PDF417).
+    Parses and normalizes the text string of an Argentine DNI (PDF417).
     """
     if not raw_text:
         return None
@@ -101,7 +96,7 @@ def parsear_dni_pdf417(raw_text: str) -> Optional[Dict[str, str]]:
     fields = [field.strip() for field in raw_text.strip().split('@')]
   
     if len(fields) < 8:
-        raise ValueError("El formato del texto escaneado no coincide con el estándar del DNI argentino.")
+        raise ValueError("The format of the scanned text does not match the Argentine DNI standard.")
       
     def parse_fecha(fecha_str: str) -> Optional[str]:
         try:
@@ -114,7 +109,7 @@ def parsear_dni_pdf417(raw_text: str) -> Optional[Dict[str, str]]:
         "apellido": fields[1],
         "nombre": fields[2],
         "sexo": fields[3].upper(),
-        "dni": str(int(fields[4])),  # Limpia ceros a la izquierda
+        "dni": str(int(fields[4])),  # Cleans leading zeros
         "ejemplar": fields[5].upper(),
         "fecha_nacimiento": parse_fecha(fields[6]),
         "fecha_emision": parse_fecha(fields[7])
@@ -122,23 +117,23 @@ def parsear_dni_pdf417(raw_text: str) -> Optional[Dict[str, str]]:
 ```
 
 > [!WARNING]
-> **Consideración de codificación (Encoding):** Al decodificar el código de barras desde la cámara o lector, asegúrese de decodificar en **UTF-8** o **ISO-8859-1** para no romper caracteres propios del español, como la letra **Ñ** o letras acentuadas (por ejemplo: `MUÑOZ` o `MARÍA`).
+> **Encoding Consideration:** When decoding the barcode from the camera or reader, be sure to decode in **UTF-8** or **ISO-8859-1** so as not to break characters specific to Spanish, such as the letter **Ñ** or accented letters (for example: `MUÑOZ` or `MARÍA`).
 
 ---
 
-## 3. Códigos QR Dinámicos (DNI Digital en "Mi Argentina")
+## 3. Dynamic QR Codes (Digital DNI in "Mi Argentina")
 
-El DNI virtual desplegado en la app móvil "Mi Argentina" genera un código QR dinámico por motivos de seguridad.
+The virtual DNI deployed in the "Mi Argentina" mobile app generates a dynamic QR code for security reasons.
 
-* **Formato de datos:** Almacena un **JSON Web Token (JWT)** firmado digitalmente mediante criptografía asimétrica por la Secretaría de Innovación Pública / RENAPER.
-* **Lectura:** **No es decodificable offline en texto plano.** Para validar la credencial, se debe utilizar la aplicación oficial de control llamada **ValidAR** (la cual contiene la clave pública para verificar la validez de la firma digital) o integrar el servicio provisto mediante las APIs oficiales del Estado.
+* **Data Format:** Stores a **JSON Web Token (JWT)** digitally signed using asymmetric cryptography by the Secretariat of Public Innovation / RENAPER.
+* **Reading:** **It is not decodable offline in plain text.** To validate the credential, the official control application called **ValidAR** must be used (which contains the public key to verify the validity of the digital signature) or integrate the service provided through the official State APIs.
 
 ---
 
-## 4. DNI Electrónico de Policarbonato (Chip y QR)
+## 4. Polycarbonate Electronic DNI (Chip and QR)
 
-El nuevo modelo de DNI físico (implementado por el RENAPER a finales de 2023) incorpora policarbonato, un chip electrónico sin contacto (NFC) y un código QR de seguridad.
+The new physical DNI model (implemented by RENAPER in late 2023) incorporates polycarbonate, a contactless electronic chip (NFC), and a security QR code.
 
-* **Estándar:** Cumple con la normativa internacional **ICAO/OACI 9303** para documentos de viaje.
-* **Formato de datos:** Tanto el chip como el código QR asociado almacenan datos biométricos y biográficos protegidos por mecanismos criptográficos para impedir la falsificación o lectura no autorizada.
-* **Lectura:** La decodificación requiere de claves criptográficas y sistemas homologados de verificación (por ejemplo, mediante la aplicación oficial **eRENAPER**).
+* **Standard:** Complies with the international **ICAO 9303** standard for travel documents.
+* **Data Format:** Both the chip and the associated QR code store biometric and biographical data protected by cryptographic mechanisms to prevent counterfeiting or unauthorized reading.
+* **Reading:** Decoding requires cryptographic keys and approved verification systems (for example, through the official **eRENAPER** application).

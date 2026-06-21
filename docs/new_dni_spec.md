@@ -1,34 +1,33 @@
-# Especificación Funcional: Código QR en el Nuevo DNI Argentino (eDNI)
+# Functional Specification: QR Code in the New Argentine DNI (eDNI)
 
-Este documento detalla la especificación técnica y funcional para la generación y el procesamiento del código QR incorporado en la nueva versión del Documento Nacional de Identidad Electrónico (eDNI) de la República Argentina, implementado bajo la **Disposición 1255/2023** del Registro Nacional de las Personas (Renaper).
+This document details the technical and functional specification for the generation and processing of the QR code incorporated in the new version of the Electronic National Identity Document (eDNI) of the Argentine Republic, implemented under **Disposition 1255/2023** of the National Registry of Persons (Renaper).
 
-El propósito de este documento es servir como guía de referencia para el desarrollo de sistemas de simulación, generación y validación de identidades.
+The purpose of this document is to serve as a reference guide for the development of identity simulation, generation, and validation systems.
 
 ---
 
-## 1. Payload del Código QR (Estructura de la URL)
+## 1. QR Code Payload (URL Structure)
 
-El código QR del nuevo eDNI codifica directamente una **dirección web uniforme de recurso segura (URL HTTPS)** administrada y autenticada por el dominio oficial del Renaper.
+The new eDNI QR code directly encodes a **secure uniform resource locator (HTTPS URL)** managed and authenticated by the official Renaper domain.
 
-### Formato de la URL
+### URL Format
 
-La URL parametrizada sigue la siguiente estructura:
+The parameterized URL follows the following structure:
 
 ```text
-https://mitramite.renaper.gob.ar/validar?id=TRAMITE_ID&dni=DNI_NUM&sexo=GEN_CHAR&ejemplar=EJ_CHAR
+https://mitramite.renaper.gob.ar/validar?id=PROCEDURE_ID&dni=DNI_NUM&sexo=GENDER_CHAR&ejemplar=COPY_CHAR
 ```
 
-### Tabla de Parámetros del Payload
+### Payload Parameters Table
 
+| Parameter | Functional Name    | Data Type     | Format / Restrictions      | Description                                                                                                                                                                                                                                |
+| :-------- | :----------------- | :------------ | :------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`      | Procedure Number   | Numeric       | Exactly **9 digits**       | Unique issuance identifier. In the eDNI, it has been optimized by reducing the length from the traditional 11 digits to 9 digits to speed up response times. It changes randomly with each renewal of the physical document.             |
+| `dni`     | ID Number          | Numeric       | String of **7 or 8 digits**| The cardholder's DNI number, without thousands separators (periods).                                                                                                                                                                       |
+| `sexo`    | Gender             | Alphabetic    | 1 character (`M`, `F`, `X`)| Registered gender identifier (`M` = Male, `F` = Female, `X` = Non-Binary under the Gender Identity Law 26.743).                                                                                                                            |
+| `ejemplar`| Copy Letter        | Alphanumeric  | 1 or 2 uppercase letters   | Unique identifier of the physical print run or physical version delivered (e.g., `A`, `B`, `C`, `AA`, etc.).                                                                                                                               |
 
-| Parámetro | Nombre Funcional    | Tipo de Dato  | Formato / Restricciones      | Descripción                                                                                                                                                                                                                                |
-| :----------- | :-------------------- | :-------------- | :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`       | Número de Trámite | Numérico     | Exactamente**9 dígitos**    | Identificador único de emisión. En el eDNI se ha optimizado reduciendo la longitud de los 11 dígitos tradicionales a 9 dígitos para acelerar los tiempos de respuesta. Cambia aleatoriamente en cada renovación del documento físico. |
-| `dni`      | Matrícula          | Numérico     | Cadena de **7 u 8 dígitos** | Número del DNI del titular, sin puntos de separación de millares.                                                                                                                                                                         |
-| `sexo`     | Género             | Alfabético   | 1 carácter (`M`, `F`, `X`)  | Identificador del sexo registrado (`M` = Masculino, `F` = Femenino, `X` = No Binario bajo la Ley 26.743 de Identidad de Género).                                                                                                           |
-| `ejemplar` | Ejemplar            | Alfanumérico | 1 o 2 letras en mayúsculas  | Identificador único de la tirada física o versión física entregada (ej.:`A`, `B`, `C`, `AA`, etc.).                                                                                                                                     |
-
-#### Ejemplo de URL de Payload Completa:
+#### Full Payload URL Example:
 
 ```text
 https://mitramite.renaper.gob.ar/validar?id=102938475&dni=45091283&sexo=X&ejemplar=A
@@ -36,34 +35,34 @@ https://mitramite.renaper.gob.ar/validar?id=102938475&dni=45091283&sexo=X&ejempl
 
 ---
 
-## 2. Parametrización del Motor Gráfico de Generación (QR)
+## 2. Parameterization of the Generation Graphics Engine (QR)
 
-Para la simulación y generación programática del código QR, se debe cumplir de forma estricta con el estándar internacional **ISO/IEC 18004**. A continuación se detallan las configuraciones para las librerías generadoras de códigos QR (ej. `qrcode` en Node.js o equivalentes):
+For the simulation and programmatic generation of the QR code, the international standard **ISO/IEC 18004** must be strictly met. Below are the configurations for QR code generator libraries (e.g., `qrcode` in Node.js or equivalents):
 
-* **Nivel de Corrección de Errores (ECC):** **`M`** (Nivel Medio), el cual permite la recuperación de hasta el 15% de daño físico en el área impresa del código.
-* **Zona de Silencio (Margin):** **4 módulos lógicos** de margen mínimo para evitar fallas o interferencias al realizar la lectura óptica.
-* **Escala (Scale):** **4 píxeles** por módulo de densidad física mínima.
-* **Colores:** Contraste óptico máximo:
-  * Módulos oscuros (Dark): `#000000` (Negro absoluto).
-  * Fondo (Light): `#FFFFFF` (Blanco absoluto).
+* **Error Correction Level (ECC):** **`M`** (Medium Level), which allows the recovery of up to 15% physical damage in the printed area of the code.
+* **Quiet Zone (Margin):** **4 logical modules** of minimum margin to avoid failures or interference when performing optical reading.
+* **Scale:** **4 pixels** per module of minimum physical density.
+* **Colors:** Maximum optical contrast:
+  * Dark modules: `#000000` (Absolute black).
+  * Background (Light): `#FFFFFF` (Absolute white).
 
 ---
 
-## 3. Implementación de Referencia en Código
+## 3. Reference Code Implementation
 
-A continuación se dejan implementaciones de referencia en JavaScript y Python para construir la URL del QR y validar los parámetros del nuevo DNI electrónico.
+Below are reference implementations in JavaScript and Python to build the QR URL and validate the parameters of the new electronic DNI.
 
-### Implementación en JavaScript / TypeScript
+### JavaScript / TypeScript Implementation
 
 ```javascript
 /**
- * Construye la URL de validación parametrizada del DNI.
- * @param {object} params - Parámetros del DNI.
- * @param {string|number} params.id - Número de trámite (9 dígitos).
- * @param {string|number} params.dni - Matrícula (7-8 dígitos).
- * @param {string} params.sexo - Género ('M', 'F', 'X').
- * @param {string} params.ejemplar - Letra del ejemplar (ej. 'A').
- * @returns {string} URL formateada.
+ * Builds the parameterized DNI validation URL.
+ * @param {object} params - DNI parameters.
+ * @param {string|number} params.id - Procedure number (9 digits).
+ * @param {string|number} params.dni - ID number (7-8 digits).
+ * @param {string} params.sexo - Gender ('M', 'F', 'X').
+ * @param {string} params.ejemplar - Copy letter (e.g., 'A').
+ * @returns {string} Formatted URL.
  */
 function generarUrlQrDni(params) {
   const idStr = params.id.toString().trim();
@@ -72,21 +71,21 @@ function generarUrlQrDni(params) {
   const ejemplarStr = params.ejemplar.trim().toUpperCase();
   
   if (idStr.length !== 9 || isNaN(params.id)) {
-    throw new Error("El número de trámite (id) para el nuevo DNI electrónico debe ser exactamente de 9 dígitos.");
+    throw new Error("The procedure number (id) for the new electronic DNI must be exactly 9 digits.");
   }
   
   return `https://mitramite.renaper.gob.ar/validar?id=${idStr}&dni=${dniStr}&sexo=${sexoStr}&ejemplar=${ejemplarStr}`;
 }
 ```
 
-### Implementación en Python
+### Python Implementation
 
 ```python
 import re
 
 def generar_url_qr_dni(tramite_id: str, dni: str, sexo: str, ejemplar: str) -> str:
     """
-    Construye la URL de validación oficial parametrizada para el código QR del eDNI.
+    Builds the official parameterized validation URL for the eDNI QR code.
     """
   
     id_str = str(tramite_id).strip()
@@ -95,21 +94,21 @@ def generar_url_qr_dni(tramite_id: str, dni: str, sexo: str, ejemplar: str) -> s
     ejemplar_str = str(ejemplar).strip().upper()
   
     if len(id_str) != 9 or not id_str.isdigit():
-        raise ValueError("El número de trámite (id) para el nuevo DNI electrónico debe ser exactamente de 9 dígitos numéricos.")
+        raise ValueError("The procedure number (id) for the new electronic DNI must be exactly 9 numeric digits.")
   
     return f"https://mitramite.renaper.gob.ar/validar?id={id_str}&dni={dni_str}&sexo={sexo_str}&ejemplar={ejemplar_str}"
 ```
 
 ---
 
-## 4. Consideraciones de Validación e Integración
+## 4. Validation and Integration Considerations
 
-Al integrar la captura de los códigos ópticos en sistemas informáticos (por ejemplo, flujos KYC y onboarding digital), se deben implementar las siguientes reglas de negocio:
+When integrating the capture of optical codes into computer systems (e.g., KYC flows and digital onboarding), the following business rules must be implemented:
 
-1. **Gestión de Identidades con Género "X":**
+1. **Identity Management with Gender "X":**
 
-   * Las bases de datos receptoras deben permitir el almacenamiento del carácter `X` en la columna de sexo/género con al menos 1 carácter de longitud.
-   * Se deben refactorizar validaciones legadas del tipo `if (sexo != 'M' && sexo != 'F')` para prevenir rechazos automáticos de transacciones válidas de personas con género no binario.
-2. **Normalización de Nombres y Apellidos:**
+   * The receiving databases must allow the storage of the character `X` in the sex/gender column with at least 1 character in length.
+   * Legacy validations of the type `if (sexo != 'M' && sexo != 'F')` must be refactored to prevent automatic rejections of valid transactions from people with non-binary gender.
+2. **Normalization of Names and Surnames:**
 
-   * Al parsear o simular datos biográficos complementarios, se debe asegurar el soporte para el set de caracteres **ISO-8859-1** o **UTF-8** para evitar la pérdida de tildes o caracteres específicos del idioma español (como la letra **Ñ**).
+   * When parsing or simulating complementary biographical data, support for the **ISO-8859-1** or **UTF-8** character set must be ensured to avoid the loss of accents or specific characters of the Spanish language (such as the letter **Ñ**).

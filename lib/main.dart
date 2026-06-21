@@ -158,6 +158,7 @@ class MainScreen extends StatelessWidget {
                     decoration: const InputDecoration(labelText: 'DNI Mínimo'),
                     keyboardType: TextInputType.number,
                     inputFormatters: [
+                      LengthLimitingTextInputFormatter(10),
                       ThousandsSeparatorInputFormatter(),
                     ],
                     onChanged: (value) {
@@ -173,6 +174,7 @@ class MainScreen extends StatelessWidget {
                     decoration: const InputDecoration(labelText: 'DNI Máximo'),
                     keyboardType: TextInputType.number,
                     inputFormatters: [
+                      LengthLimitingTextInputFormatter(10),
                       ThousandsSeparatorInputFormatter(),
                     ],
                     onChanged: (value) {

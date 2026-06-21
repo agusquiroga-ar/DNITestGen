@@ -1,17 +1,17 @@
-# Feature 06: Integración Final y Lógica de Generación
+# Feature 06: Final Integration and Generation Logic
 
-## Descripción
-Vincular todos los componentes creados: el botón "Generar", los parámetros configurados en la UI y los generadores de DNI. Al presionar el botón, el sistema debe leer los parámetros, generar una identidad válida y, basado en el tipo de DNI seleccionado, presentar en pantalla el PDF417 (viejo) o el QR (nuevo). 
+## Description
+Link all created components: the "Generate" button, the parameters configured in the UI, and the DNI generators. Upon pressing the button, the system must read the parameters, generate a valid identity, and based on the selected DNI type, display the PDF417 (old) or the QR (new) on the screen.
 
-## Criterios de Aceptación
-1. Al hacer click en "Generar", el sistema debe verificar el estado de los parámetros numéricos y validar que min <= max.
-2. Basado en el selector de tipo:
-   - Si es "Versión Vieja", debe generar la identidad y mostrar un PDF417.
-   - Si es "Versión Nueva", debe generar la identidad y mostrar un QR.
-   - Si es "Aleatorio", debe escoger internamente (por ejemplo, con 50% de probabilidad) entre Versión Vieja y Versión Nueva en cada pulsación.
-3. El área de visualización se debe actualizar dinámicamente con el nuevo código y los datos biográficos en texto plano para referencia del usuario debajo del gráfico.
+## Acceptance Criteria
+1. When clicking "Generate", the system must check the state of the numerical parameters and validate that min <= max.
+2. Based on the type selector:
+   - If "Old Version", it must generate the identity and show a PDF417.
+   - If "New Version", it must generate the identity and show a QR.
+   - If "Random", it must internally choose (e.g., with 50% probability) between Old Version and New Version on each press.
+3. The display area must dynamically update with the new code and the biographical data in plain text for user reference below the graphic.
 
-## Pruebas Necesarias
-- **Prueba de Integración (End-to-End):**
-  - Simular el flujo completo del usuario: configurar valores (min, max, tipo), presionar el botón y confirmar que aparece un widget de código de barras o QR en pantalla junto con los textos correspondientes a la identidad.
-  - Repetir el flujo seleccionando "Aleatorio" y presionar múltiples veces el botón, garantizando que no existan crash de la aplicación.
+## Required Tests
+- **Integration Test (End-to-End):**
+  - Simulate the full user flow: configure values (min, max, type), press the button, and confirm that a barcode or QR widget appears on the screen along with the texts corresponding to the identity.
+  - Repeat the flow selecting "Random" and press the button multiple times, ensuring there are no application crashes.

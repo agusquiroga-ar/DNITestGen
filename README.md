@@ -1,56 +1,57 @@
 # DNI Test Gen
 
-**DNI Test Gen** es una aplicación de escritorio desarrollada en Flutter para Windows diseñada para asistir en el proceso de Quality Assurance (QA). 
+**DNI Test Gen** is a Flutter desktop application for Windows designed to assist in the Quality Assurance (QA) process. It randomly generates fictitious credentials that simulate the structure and formats of the Argentine National Identity Document (DNI).
 
-> ⚠️ **IMPORTANTE:** Esta aplicación **únicamente genera los códigos escaneables (QR y de barras PDF417)** con datos biográficos ficticios y aleatorios. **No** genera plantillas gráficas, fotografías, imágenes ni ninguna representación visual de la tarjeta física del DNI. Su propósito es exclusivo para probar procesos de escaneo e integración en sistemas de desarrollo y QA.
-## Características
+> ⚠️ **IMPORTANT:** This application **only generates the scannable codes (QR and PDF417 barcodes)** with fictitious and random biographical data. It does **not** generate graphic templates, photographs, images, or any visual representation of the physical DNI card. Its sole purpose is for testing scanning processes and integration in development and QA systems.
 
-*   **Soporte Multiformato:** Genera códigos acordes a dos normativas vigentes en Argentina:
-    *   **DNI Versión Vieja (PDF417):** Estructura los datos biográficos bajo un formato separado por `@` renderizando un código de barras PDF417.
-    *   **Nuevo eDNI (QR):** Construye la URL de validación parametrizada oficial (ej: `mitramite.renaper.gob.ar/validar?...`) renderizando el código QR con su respectivo Nivel de Corrección (M).
-*   **Generador Aleatorio Ficticio:**
-    *   Selecciona aleatoriamente nombres y apellidos de diccionarios pre-cargados (`assets/names.json` y `assets/surnames.json`).
-    *   Genera un Número de Trámite válido de exactamente 9 dígitos.
-    *   Asigna géneros válidos (`M`, `F`, `X`) y diferentes letras de ejemplares.
-    *   Genera fechas lógicas de nacimiento y emisión.
-*   **Parametría Configurable:**
-    *   Selección del Tipo de DNI (Viejo, Nuevo o 50/50 Aleatorio).
-    *   Límites configurables para acotar la generación del DNI (Rango Numérico Mínimo y Máximo).
-*   **Inspección Visual Rápida:** Muestra tanto el código generado para el escáner físico como los datos biográficos en texto plano por debajo de este.
+## Features
 
-## Arquitectura y Patrones
+*   **Multi-format Support:** Generates codes according to two current regulations in Argentina:
+    *   **Old DNI Version (PDF417):** Structures biographical data in a format separated by `@`, rendering a PDF417 barcode.
+    *   **New eDNI (QR):** Constructs the official parameterized validation URL (e.g., `mitramite.renaper.gob.ar/validar?...`), rendering the QR code with its respective Error Correction Level (M).
+*   **Fictitious Random Generator:**
+    *   Randomly selects names and surnames from pre-loaded dictionaries (`assets/names.json` and `assets/surnames.json`).
+    *   Generates a valid 9-digit Procedure Number (Número de Trámite).
+    *   Assigns valid genders (`M`, `F`, `X`) and different copy letters (Ejemplar).
+    *   Generates logical dates for birth and issuance.
+*   **Configurable Parameters:**
+    *   Selection of DNI Type (Old, New, or 50/50 Random).
+    *   Configurable limits to bound the DNI generation (Minimum and Maximum Numeric Range).
+*   **Quick Visual Inspection:** Displays both the generated code for the physical scanner and the biographical data in plain text below it.
 
-La aplicación fue desarrollada utilizando metodologías de *Spec Driven Development* dividiendo el alcance en pequeños incrementos o "features":
+## Architecture and Patterns
 
-1.  **Gestor de Estado (Provider):** Desacoplamiento de la lógica de negocio a través de `ChangeNotifierProvider` en `lib/main.dart`.
-2.  **Modelos de Datos (`lib/models/`):** Estructuras limpias para encapsular la Identidad generada (`identity.dart`).
-3.  **Generadores Independientes (`lib/generators/`):** Clases utilitarias aisladas (`old_dni_generator.dart` y `new_dni_generator.dart`) que se responsabilizan individualmente por los formatos de texto y dependencias de renderizado gráfico (`barcode_widget`, `qr_flutter`).
-4.  **Servicios Falsos/Mocking (`lib/services/`):** `data_generator_service.dart` aísla las reglas de creación del RNG (Random Number Generator).
+The application was developed using *Spec Driven Development* methodologies, dividing the scope into small increments or "features":
 
-## Pruebas Automáticas
+1.  **State Management (Provider):** Decoupling of business logic using `ChangeNotifierProvider` in `lib/main.dart`.
+2.  **Data Models (`lib/models/`):** Clean structures to encapsulate the generated Identity (`identity.dart`).
+3.  **Independent Generators (`lib/generators/`):** Isolated utility classes (`old_dni_generator.dart` and `new_dni_generator.dart`) that handle text formats and graphic rendering dependencies (`barcode_widget`, `qr_flutter`) individually.
+4.  **Mocking Services (`lib/services/`):** `data_generator_service.dart` isolates the Random Number Generator (RNG) creation rules.
 
-El proyecto posee una amplia cobertura de validación a través de **16 pruebas unitarias y de widgets**.
+## Automated Tests
 
-Para correr la suite de pruebas localmente:
+The project has comprehensive validation coverage through **16 unit and widget tests**.
+
+To run the test suite locally:
 ```bash
 flutter test
 ```
 
-## Requisitos y Configuración Inicial
+## Requirements and Initial Setup
 
-Para ejecutar la aplicación, debes tener el **SDK de Flutter** instalado con soporte para Windows Desktop activado.
+To run the application, you must have the **Flutter SDK** installed with Windows Desktop support enabled.
 
-### Instalación
+### Installation
 ```bash
-# 1. Clonar este repositorio (si aplicara)
-git clone <tu-repositorio>
+# 1. Clone this repository (if applicable)
+git clone <your-repository>
 
-# 2. Obtener dependencias de pub.dev
+# 2. Fetch pub.dev dependencies
 flutter pub get
 
-# 3. Ejecutar en Windows
+# 3. Run on Windows
 flutter run -d windows
 ```
 
 ---
-*Este proyecto fue generado orquestando un ciclo de trabajo agente-asistido.*
+*This project was generated by orchestrating an agent-assisted workflow.*
