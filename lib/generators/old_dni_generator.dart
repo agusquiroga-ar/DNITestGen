@@ -16,7 +16,7 @@ class OldDniGenerator {
     final ejemplar = identity.ejemplar;
     final fechaNac = dateFormat.format(identity.fechaNacimiento);
     final fechaEmi = dateFormat.format(identity.fechaEmision);
-    final codigo = "200"; // Código de control / CUIL estático simulado
+    //final codigo = "200"; // Código de control / CUIL estático simulado
 
     //return '$tramite@$apellido@$nombre@$sexo@$dni@$ejemplar@$fechaNac@$fechaEmi@$codigo';
     return '$tramite@$apellido@$nombre@$sexo@$dni@$ejemplar@$fechaNac@$fechaEmi';
@@ -25,7 +25,11 @@ class OldDniGenerator {
   /// Retorna un widget que renderiza gráficamente el código PDF417
   static Widget buildBarcodeWidget(String data) {
     return BarcodeWidget(
-      barcode: Barcode.pdf417(),
+      barcode: Barcode.pdf417(
+        securityLevel: Pdf417SecurityLevel
+            .level4, // Nivel alto para documentos de identidad
+        moduleHeight: 3.0, // Relación de aspecto para barras alargadas
+      ),
       data: data,
       errorBuilder: (context, error) => Center(child: Text(error)),
       width: 400,
