@@ -1,7 +1,8 @@
 # DNI Test Gen
 
-**DNI Test Gen** es una aplicación de escritorio desarrollada en Flutter para Windows diseñada para asistir en el proceso de Quality Assurance (QA). Permite generar aleatoriamente credenciales ficticias que simulan la estructura y formatos de los Documentos Nacionales de Identidad (DNI) de la República Argentina.
+**DNI Test Gen** es una aplicación de escritorio desarrollada en Flutter para Windows diseñada para asistir en el proceso de Quality Assurance (QA). 
 
+> ⚠️ **IMPORTANTE:** Esta aplicación **únicamente genera los códigos escaneables (QR y de barras PDF417)** con datos biográficos ficticios y aleatorios. **No** genera plantillas gráficas, fotografías, imágenes ni ninguna representación visual de la tarjeta física del DNI. Su propósito es exclusivo para probar procesos de escaneo e integración en sistemas de desarrollo y QA.
 ## Características
 
 *   **Soporte Multiformato:** Genera códigos acordes a dos normativas vigentes en Argentina:

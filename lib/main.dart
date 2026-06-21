@@ -154,12 +154,14 @@ class MainScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: TextFormField(
-                    initialValue: state.minDni.toString(),
+                    initialValue: state.minDni.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.'),
                     decoration: const InputDecoration(labelText: 'DNI Mínimo'),
                     keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    inputFormatters: [
+                      ThousandsSeparatorInputFormatter(),
+                    ],
                     onChanged: (value) {
-                      final parsed = int.tryParse(value) ?? 0;
+                      final parsed = int.tryParse(value.replaceAll('.', '')) ?? 0;
                       context.read<AppState>().setMinDni(parsed);
                     },
                   ),
@@ -167,12 +169,14 @@ class MainScreen extends StatelessWidget {
                 const SizedBox(width: 16),
                 Expanded(
                   child: TextFormField(
-                    initialValue: state.maxDni.toString(),
+                    initialValue: state.maxDni.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.'),
                     decoration: const InputDecoration(labelText: 'DNI Máximo'),
                     keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    inputFormatters: [
+                      ThousandsSeparatorInputFormatter(),
+                    ],
                     onChanged: (value) {
-                      final parsed = int.tryParse(value) ?? 0;
+                      final parsed = int.tryParse(value.replaceAll('.', '')) ?? 0;
                       context.read<AppState>().setMaxDni(parsed);
                     },
                   ),
@@ -241,6 +245,37 @@ class MainScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class ThousandsSeparatorInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    if (newValue.text.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    final int selectionIndexFromTheRight =
+        newValue.text.length - newValue.selection.end;
+
+    String newValueText = newValue.text.replaceAll('.', '');
+    if (int.tryParse(newValueText) == null && newValueText.isNotEmpty) {
+      return oldValue;
+    }
+
+    String formattedText = newValueText.replaceAllMapped(
+        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.');
+
+    int newSelectionOffset = formattedText.length - selectionIndexFromTheRight;
+    if (newSelectionOffset < 0) {
+      newSelectionOffset = 0;
+    }
+
+    return TextEditingValue(
+      text: formattedText,
+      selection: TextSelection.collapsed(offset: newSelectionOffset),
     );
   }
 }
