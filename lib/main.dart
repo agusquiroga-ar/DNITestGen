@@ -5,8 +5,13 @@ import 'package:provider/provider.dart';
 
 import 'services/data_generator_service.dart';
 import 'models/identity.dart';
+import 'models/dni_type.dart';
+import 'models/generated_code_record.dart';
 import 'generators/old_dni_generator.dart';
 import 'generators/new_dni_generator.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,7 +21,7 @@ void main() async {
   runApp(DniGeneratorApp(dataService: dataService));
 }
 
-enum DniType { oldVersion, newVersion, random }
+
 
 class AppState extends ChangeNotifier {
   final DataGeneratorService _dataService;
@@ -29,6 +34,9 @@ class AppState extends ChangeNotifier {
   Identity? _currentIdentity;
   Widget? _currentGeneratedWidget;
   DniType? _lastGeneratedType;
+
+  List<GeneratedCodeRecord> _history = [];
+  List<GeneratedCodeRecord> get history => _history;
 
   AppState(this._dataService);
 
@@ -86,9 +94,80 @@ class AppState extends ChangeNotifier {
       }
       
       _lastGeneratedType = typeToGenerate;
+      
+      final record = GeneratedCodeRecord(
+        identity: _currentIdentity!,
+        type: typeToGenerate,
+        generatedAt: DateTime.now(),
+      );
+      _history.add(record);
+
       notifyListeners();
     } catch (e) {
       _errorMessage = "Error al generar identidad: $e";
+      notifyListeners();
+    }
+  }
+
+  void loadRecordFromHistory(GeneratedCodeRecord record) {
+    _currentIdentity = record.identity;
+    _lastGeneratedType = record.type;
+    
+    if (record.type == DniType.oldVersion) {
+      final data = OldDniGenerator.generateString(record.identity);
+      _currentGeneratedWidget = OldDniGenerator.buildBarcodeWidget(data);
+    } else {
+      final data = NewDniGenerator.generateUrl(record.identity);
+      _currentGeneratedWidget = NewDniGenerator.buildQrWidget(data);
+    }
+    
+    notifyListeners();
+  }
+
+  Future<void> saveSession() async {
+    try {
+      String? outputFile = await FilePicker.saveFile(
+        dialogTitle: 'Guardar sesión de códigos generados',
+        fileName: 'dni_session.json',
+        allowedExtensions: ['json'],
+        type: FileType.custom,
+      );
+
+      if (outputFile == null) {
+        return; // User canceled
+      }
+
+      final jsonList = _history.map((e) => e.toJson()).toList();
+      final jsonString = json.encode(jsonList);
+      
+      final file = File(outputFile);
+      await file.writeAsString(jsonString);
+    } catch (e) {
+      _errorMessage = "Error al guardar sesión: $e";
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadSession() async {
+    try {
+      FilePickerResult? result = await FilePicker.pickFiles(
+        dialogTitle: 'Cargar sesión de códigos generados',
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
+
+      if (result != null && result.files.single.path != null) {
+        final file = File(result.files.single.path!);
+        final jsonString = await file.readAsString();
+        final List<dynamic> jsonList = json.decode(jsonString);
+        
+        final loadedHistory = jsonList.map((e) => GeneratedCodeRecord.fromJson(e as Map<String, dynamic>)).toList();
+        
+        _history.addAll(loadedHistory);
+        notifyListeners();
+      }
+    } catch (e) {
+      _errorMessage = "Error al cargar sesión: $e";
       notifyListeners();
     }
   }
@@ -129,12 +208,71 @@ class MainScreen extends StatelessWidget {
         title: const Text('Generador de DNI'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Tipo de DNI
-            DropdownButtonFormField<DniType>(
+      body: Row(
+        children: [
+          Container(
+            width: 280,
+            decoration: BoxDecoration(
+              border: Border(right: BorderSide(color: Colors.grey.shade300)),
+              color: Colors.grey.shade50,
+            ),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  width: double.infinity,
+                  color: Colors.grey.shade200,
+                  child: const Text('Historial de Sesión', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: state.history.length,
+                    itemBuilder: (context, index) {
+                      final record = state.history[index];
+                      return ListTile(
+                        title: Text('DNI: ${record.identity.dni}'),
+                        subtitle: Text('${record.identity.apellido}\n${record.type == DniType.oldVersion ? "Viejo (PDF417)" : "Nuevo (QR)"}'),
+                        isThreeLine: true,
+                        onTap: () {
+                          context.read<AppState>().loadRecordFromHistory(record);
+                        },
+                      );
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          context.read<AppState>().saveSession();
+                        },
+                        icon: const Icon(Icons.save),
+                        label: const Text('Guardar Sesión'),
+                      ),
+                      const SizedBox(height: 8),
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          context.read<AppState>().loadSession();
+                        },
+                        icon: const Icon(Icons.folder_open),
+                        label: const Text('Cargar Sesión'),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  // Tipo de DNI
+                  DropdownButtonFormField<DniType>(
               initialValue: state.selectedType,
               decoration: const InputDecoration(labelText: 'Tipo de Documento'),
               items: const [
@@ -244,8 +382,11 @@ class MainScreen extends StatelessWidget {
                       ),
               ),
             ),
-          ],
-        ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

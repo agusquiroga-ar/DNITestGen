@@ -22,7 +22,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Check if DNI information appeared instead of placeholder
-      expect(find.textContaining('DNI:'), findsOneWidget);
+      expect(find.textContaining('DNI:'), findsWidgets);
       expect(find.text('Aquí se mostrará el código generado'), findsNothing);
       
       // Since it's random, we check if one of the formats is printed

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:dni_test_gen/main.dart';
+import 'package:dni_test_gen/models/dni_type.dart';
 import 'package:dni_test_gen/services/data_generator_service.dart';
 
 void main() {
@@ -32,7 +33,7 @@ void main() {
       // Ya no deberíamos ver el placeholder, sino datos reales y el código.
       expect(find.text('Aquí se mostrará el código generado'), findsNothing);
       expect(find.textContaining('Formato:'), findsOneWidget);
-      expect(find.textContaining('DNI:'), findsOneWidget);
+      expect(find.textContaining('DNI:'), findsWidgets);
       expect(find.textContaining('Nombre: Perez, Juan'), findsOneWidget);
     });
 
