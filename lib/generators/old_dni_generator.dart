@@ -28,11 +28,11 @@ class OldDniGenerator {
       barcode: Barcode.pdf417(
         securityLevel: Pdf417SecurityLevel
             .level4, // Nivel alto para documentos de identidad
-        moduleHeight: 3.0, // Relación de aspecto para barras alargadas
+        moduleHeight: 4.0, // Relación de aspecto para barras alargadas
       ),
       data: data,
       errorBuilder: (context, error) => Center(child: Text(error)),
-      width: 400,
+      width: 500,
       height: 100,
       drawText: false,
     );
