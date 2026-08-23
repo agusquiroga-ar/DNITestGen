@@ -17,11 +17,11 @@ void main() {
       fechaEmision: DateTime(2022, 10, 5),
     );
 
-    test('generateString returns 8 fields separated by @', () {
+    test('generateString returns 9 fields separated by @', () {
       final result = OldDniGenerator.generateString(identity);
       final parts = result.split('@');
       
-      expect(parts.length, 8);
+      expect(parts.length, 9);
     });
 
     test('generateString formats dates correctly', () {
@@ -29,9 +29,9 @@ void main() {
       final parts = result.split('@');
       
       // Fecha de nacimiento está en el índice 6
-      expect(parts[6], '15/01/1990');
+      expect(parts[6], '"15/01/1990"');
       // Fecha de emisión está en el índice 7
-      expect(parts[7], '05/10/2022');
+      expect(parts[7], '"05/10/2022"');
     });
 
     test('generateString converts names to uppercase', () {
@@ -39,8 +39,8 @@ void main() {
       final parts = result.split('@');
       
       // Apellido índice 1, Nombre índice 2
-      expect(parts[1], 'PEREZ');
-      expect(parts[2], 'JUAN CARLOS');
+      expect(parts[1], '"PEREZ"');
+      expect(parts[2], '"JUAN CARLOS"');
     });
 
     testWidgets('buildBarcodeWidget renders a BarcodeWidget', (WidgetTester tester) async {

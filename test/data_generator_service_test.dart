@@ -38,9 +38,9 @@ void main() {
       expect(['A', 'B', 'C', 'D'], contains(identity.ejemplar));
     });
 
-    test('generateIdentity creates tramiteId of exactly 9 digits', () {
+    test('generateIdentity creates tramiteId of exactly 11 digits', () {
       final identity = service.generateIdentity();
-      expect(identity.tramiteId.length, 9);
+      expect(identity.tramiteId.length, 11);
       expect(int.tryParse(identity.tramiteId), isNotNull); // Verifica que sea numerico
     });
   });

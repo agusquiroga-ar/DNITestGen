@@ -52,8 +52,9 @@ class DataGeneratorService {
     
     final dni = minDni + _random.nextInt((maxDni - minDni) + 1);
     
-    // Generar tramiteId de exactamente 9 dígitos
-    final tramiteId = (100000000 + _random.nextInt(900000000)).toString();
+    // Generar tramiteId de exactamente 11 dígitos (padded con ceros, o generado aleatorio de 11)
+    final num = 100000000 + _random.nextInt(900000000);
+    final tramiteId = '00${num.toString()}';
 
     // Fecha de nacimiento aleatoria (entre 18 y 60 años atrás)
     final age = 18 + _random.nextInt(42);
