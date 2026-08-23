@@ -21,7 +21,7 @@ The root of the file is a **JSON Array**. Each element in the array represents a
       "sexo": "M",
       "dni": 35123456,
       "ejemplar": "A",
-      "tramiteId": "205412345",
+      "tramiteId": "00205412345",
       "fechaNacimiento": "1990-05-15T00:00:00.000",
       "fechaEmision": "2023-10-01T14:30:00.000"
     },
@@ -35,7 +35,7 @@ The root of the file is a **JSON Array**. Each element in the array represents a
       "sexo": "F",
       "dni": 40987654,
       "ejemplar": "B",
-      "tramiteId": "109876543",
+      "tramiteId": "00109876543",
       "fechaNacimiento": "1998-11-20T00:00:00.000",
       "fechaEmision": "2024-01-10T09:15:00.000"
     },
@@ -68,7 +68,7 @@ The root of the file is a **JSON Array**. Each element in the array represents a
 | `sexo` | `String` | Gender. Typical values: `"M"` (Male), `"F"` (Female), `"X"` (Non-binary). | Yes |
 | `dni` | `Integer` | National Identity Document number (e.g., `35123456`). | Yes |
 | `ejemplar` | `String` | Copy letter. Typical values: `"A"`, `"B"`, `"C"`, etc. | Yes |
-| `tramiteId` | `String` | 9-digit Procedure Number string (Número de Trámite). | Yes |
+| `tramiteId` | `String` | 11-digit Procedure Number string (Número de Trámite). | Yes |
 | `fechaNacimiento` | `String` | ISO-8601 formatted datetime string for Date of Birth. | Yes |
 | `fechaEmision` | `String` | ISO-8601 formatted datetime string for Date of Issue. | Yes |
 
@@ -76,6 +76,6 @@ The root of the file is a **JSON Array**. Each element in the array represents a
 
 If you are an agent tasked with generating a mock `dni_session.json` file for testing:
 1. Ensure the root is an array `[]`.
-2. Generate valid mock data for the `Identity` properties. Make sure `dni` is an integer, and `tramiteId` is a 9-digit string.
+2. Generate valid mock data for the `Identity` properties. Make sure `dni` is an integer, and `tramiteId` is an 11-digit string.
 3. Use strict ISO-8601 formatting for all date fields (`fechaNacimiento`, `fechaEmision`, `generatedAt`).
 4. Set the `type` precisely to either `"oldVersion"` or `"newVersion"`.
