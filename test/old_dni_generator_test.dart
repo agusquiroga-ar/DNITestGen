@@ -17,11 +17,11 @@ void main() {
       fechaEmision: DateTime(2022, 10, 5),
     );
 
-    test('generateString returns 9 fields separated by @', () {
+    test('generateString returns 8 fields separated by @', () {
       final result = OldDniGenerator.generateString(identity);
       final parts = result.split('@');
       
-      expect(parts.length, 9);
+      expect(parts.length, 8);
     });
 
     test('generateString formats dates correctly', () {

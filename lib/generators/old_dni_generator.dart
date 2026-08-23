@@ -6,6 +6,7 @@ import '../models/identity.dart';
 class OldDniGenerator {
   /// Devuelve el string delimitado por '@' en formato PDF417 según la especificación del DNI viejo.
   static String generateString(Identity identity) {
+    // La especificación indica DD-MM-AAAA o DD/MM/YYYY. 
     final dateFormat = DateFormat('dd/MM/yyyy');
 
     final tramite = identity.tramiteId;
@@ -16,10 +17,9 @@ class OldDniGenerator {
     final ejemplar = identity.ejemplar;
     final fechaNac = dateFormat.format(identity.fechaNacimiento);
     final fechaEmi = dateFormat.format(identity.fechaEmision);
-    //final codigo = "200"; // Código de control / CUIL estático simulado
+    final codigo = "200"; // Código de control / CUIL simulado
 
-    //return '$tramite@$apellido@$nombre@$sexo@$dni@$ejemplar@$fechaNac@$fechaEmi@$codigo';
-    return '$tramite@$apellido@$nombre@$sexo@$dni@$ejemplar@$fechaNac@$fechaEmi';
+    return '"$tramite"@"${apellido}"@"${nombre}"@"$sexo"@"$dni"@"$ejemplar"@"$fechaNac"@"$fechaEmi"@"$codigo"';
   }
 
   /// Retorna un widget que renderiza gráficamente el código PDF417
