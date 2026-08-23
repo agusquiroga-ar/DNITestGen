@@ -92,7 +92,7 @@ class AppState extends ChangeNotifier {
         final data = OldDniGenerator.generateString(_currentIdentity!);
         _currentGeneratedWidget = OldDniGenerator.buildBarcodeWidget(data);
       } else {
-        final data = NewDniGenerator.generateUrl(_currentIdentity!);
+        final data = NewDniGenerator.generateString(_currentIdentity!);
         _currentGeneratedWidget = NewDniGenerator.buildQrWidget(data);
       }
 
@@ -120,7 +120,7 @@ class AppState extends ChangeNotifier {
       final data = OldDniGenerator.generateString(record.identity);
       _currentGeneratedWidget = OldDniGenerator.buildBarcodeWidget(data);
     } else {
-      final data = NewDniGenerator.generateUrl(record.identity);
+      final data = NewDniGenerator.generateString(record.identity);
       _currentGeneratedWidget = NewDniGenerator.buildQrWidget(data);
     }
 
