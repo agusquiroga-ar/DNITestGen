@@ -19,7 +19,7 @@ class OldDniGenerator {
     final fechaEmi = dateFormat.format(identity.fechaEmision);
     final codigo = "200"; // Código de control / CUIL simulado
 
-    return '"$tramite"@"${apellido}"@"${nombre}"@"$sexo"@"$dni"@"$ejemplar"@"$fechaNac"@"$fechaEmi"@"$codigo"';
+    return '"$tramite"@"$apellido"@"$nombre"@"$sexo"@"$dni"@"$ejemplar"@"$fechaNac"@"$fechaEmi"@"$codigo"';
   }
 
   /// Retorna un widget que renderiza gráficamente el código PDF417
