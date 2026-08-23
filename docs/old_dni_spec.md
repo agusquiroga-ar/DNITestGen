@@ -10,7 +10,7 @@ Although commonly referred to as a "QR code", the back of most physical DNI card
 
 ### Scanned String Format
 
-When scanning the PDF417 code using optical readers (in keyboard emulation mode) or through image processing, an ASCII character string delimited by the `@` character is obtained.
+When scanning the PDF417 code using optical readers (in keyboard emulation mode) or through image processing, an ASCII character string delimited by the `@` character is obtained. The textual and numeric fields inside it are enclosed in double quotes (`"`).
 
 ### Field Structure (Standard Indices)
 
@@ -18,20 +18,20 @@ When splitting the resulting string using `@` (`split('@')`), an array is obtain
 
 | Index | Field                     | Format                            | Description                                                  |
 | :---- | :------------------------ | :-------------------------------- | :----------------------------------------------------------- |
-| **0** | Procedure Number          | Numeric (9 or 11 digits)          | Unique identifier of the physical document issuance.         |
-| **1** | Surnames                  | Uppercase text                    | Cardholder's surnames.                                       |
-| **2** | Names                     | Uppercase text                    | Cardholder's names.                                          |
-| **3** | Gender                    | Character (`M`, `F`, `X`)         | Registered gender.                                           |
-| **4** | DNI                       | Numeric (7 or 8 digits)           | ID number (without periods).                                 |
-| **5** | Copy Letter               | Character (`A`, `B`, `C`, etc.)   | Version/copy of the document.                                |
-| **6** | Date of Birth             | `DD/MM/YYYY`                      | Cardholder's date of birth.                                  |
-| **7** | Date of Issue             | `DD/MM/YYYY`                      | Date the copy was issued.                                    |
-| **8** | Control Code / CUIL       | Numeric / Variable                | Internal information or identifying fragment of the CUIL.    |
+| **0** | Procedure Number          | String (9 or 11 digits)           | Unique identifier of the physical document issuance.         |
+| **1** | Surnames                  | Uppercase string                  | Cardholder's surnames.                                       |
+| **2** | Names                     | Uppercase string                  | Cardholder's names.                                          |
+| **3** | Gender                    | String (`M`, `F`, `X`)            | Registered gender.                                           |
+| **4** | DNI                       | String (7 or 8 digits)            | ID number (without periods).                                 |
+| **5** | Copy Letter               | String (`A`, `B`, `C`, etc.)      | Version/copy of the document.                                |
+| **6** | Date of Birth             | String `DD/MM/YYYY`               | Cardholder's date of birth.                                  |
+| **7** | Date of Issue             | String `DD/MM/YYYY`               | Date the copy was issued.                                    |
+| **8** | Control Code / CUIL       | String (Variable length)          | Internal information or identifying fragment of the CUIL.    |
 
 #### Raw String Example:
 
 ```text
-00112233445@PEREZ@JUAN CARLOS@M@30123456@A@25/12/1985@15/10/2020@200
+"00112233445"@"PEREZ"@"JUAN CARLOS"@"M"@"30123456"@"A"@"25/12/1985"@"15/10/2020"@"200"
 ```
 
 ---
@@ -51,9 +51,11 @@ Below are examples in JavaScript and Python to parse and normalize the PDF417 co
 function parsearDniPdf417(rawText) {
   if (!rawText) return null;
   
-  const fields = rawText.trim().split('@');
+  // Remove double quotes and split by @
+  const cleanText = rawText.replace(/"/g, '');
+  const fields = cleanText.trim().split('@');
   
-  if (fields.length < 8) {
+  if (fields.length < 9) {
     throw new Error("The format of the scanned text does not match the Argentine DNI standard.");
   }
   
@@ -76,6 +78,7 @@ function parsearDniPdf417(rawText) {
     ejemplar: fields[5].trim().toUpperCase(),
     fechaNacimiento: parseFecha(fields[6].trim()),
     fechaEmision: parseFecha(fields[7].trim()),
+    codigoControl: fields[8].trim()
   };
 }
 ```
@@ -93,9 +96,11 @@ def parsear_dni_pdf417(raw_text: str) -> Optional[Dict[str, str]]:
     if not raw_text:
         return None
       
-    fields = [field.strip() for field in raw_text.strip().split('@')]
+    # Remove double quotes and split by @
+    clean_text = raw_text.replace('"', '')
+    fields = [field.strip() for field in clean_text.strip().split('@')]
   
-    if len(fields) < 8:
+    if len(fields) < 9:
         raise ValueError("The format of the scanned text does not match the Argentine DNI standard.")
       
     def parse_fecha(fecha_str: str) -> Optional[str]:
@@ -112,7 +117,8 @@ def parsear_dni_pdf417(raw_text: str) -> Optional[Dict[str, str]]:
         "dni": str(int(fields[4])),  # Cleans leading zeros
         "ejemplar": fields[5].upper(),
         "fecha_nacimiento": parse_fecha(fields[6]),
-        "fecha_emision": parse_fecha(fields[7])
+        "fecha_emision": parse_fecha(fields[7]),
+        "codigo_control": fields[8]
     }
 ```
 

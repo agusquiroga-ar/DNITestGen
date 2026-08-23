@@ -7,11 +7,11 @@
 ## Features
 
 *   **Multi-format Support:** Generates codes according to two current regulations in Argentina:
-    *   **Old DNI Version (PDF417):** Structures biographical data in a format separated by `@`, rendering a PDF417 barcode.
-    *   **New eDNI (QR):** Constructs the official parameterized validation URL (e.g., `mitramite.renaper.gob.ar/validar?...`), rendering the QR code with its respective Error Correction Level (M).
+    *   **Old DNI Version (PDF417):** Structures biographical data in a format separated by `@`, where text fields are enclosed in double quotes (`"`). It renders a PDF417 barcode (Security Level 4) including a simulated control code.
+    *   **New eDNI (QR):** Constructs a structured payload string delimited by `@` including a simulated JWT (Base64 encoded with HS256 dummy signature). It renders a high-density QR code (Version 15, Error Correction Level M).
 *   **Fictitious Random Generator:**
     *   Randomly selects names and surnames from pre-loaded dictionaries (`assets/names.json` and `assets/surnames.json`).
-    *   Generates a valid 9-digit Procedure Number (Número de Trámite).
+    *   Generates a valid 11-digit Procedure Number (Número de Trámite) padded with zeros.
     *   Assigns valid genders (`M`, `F`, `X`) and different copy letters (Ejemplar).
     *   Generates logical dates for birth and issuance.
 *   **Configurable Parameters:**
