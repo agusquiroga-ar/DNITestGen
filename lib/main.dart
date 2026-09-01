@@ -36,6 +36,26 @@ class AppState extends ChangeNotifier {
   final List<GeneratedCodeRecord> _history = [];
   List<GeneratedCodeRecord> get history => _history;
 
+  String _searchQuery = '';
+  String get searchQuery => _searchQuery;
+
+  void setSearchQuery(String query) {
+    _searchQuery = query;
+    notifyListeners();
+  }
+
+  void clearSearchQuery() {
+    _searchQuery = '';
+    notifyListeners();
+  }
+
+  List<GeneratedCodeRecord> get filteredHistory {
+    if (_searchQuery.trim().isEmpty) {
+      return _history;
+    }
+    return _history.where((record) => record.matchesSearch(_searchQuery)).toList();
+  }
+
   AppState(this._dataService);
 
   int get minDni => _minDni;
@@ -151,7 +171,15 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  Future<void> loadSession() async {
+  void importRecords(List<GeneratedCodeRecord> records, {bool replace = false}) {
+    if (replace) {
+      _history.clear();
+    }
+    _history.addAll(records);
+    notifyListeners();
+  }
+
+  Future<List<GeneratedCodeRecord>?> pickAndParseSessionFile() async {
     try {
       FilePickerResult? result = await FilePicker.pickFiles(
         dialogTitle: 'Cargar sesión de códigos generados',
@@ -164,16 +192,22 @@ class AppState extends ChangeNotifier {
         final jsonString = await file.readAsString();
         final List<dynamic> jsonList = json.decode(jsonString);
 
-        final loadedHistory = jsonList
+        return jsonList
             .map((e) => GeneratedCodeRecord.fromJson(e as Map<String, dynamic>))
             .toList();
-
-        _history.addAll(loadedHistory);
-        notifyListeners();
       }
+      return null;
     } catch (e) {
       _errorMessage = "Error al cargar sesión: $e";
       notifyListeners();
+      return null;
+    }
+  }
+
+  Future<void> loadSession({bool replace = false}) async {
+    final loadedHistory = await pickAndParseSessionFile();
+    if (loadedHistory != null && loadedHistory.isNotEmpty) {
+      importRecords(loadedHistory, replace: replace);
     }
   }
 }
@@ -213,69 +247,7 @@ class MainScreen extends StatelessWidget {
       ),
       body: Row(
         children: [
-          Container(
-            width: 280,
-            decoration: BoxDecoration(
-              border: Border(right: BorderSide(color: Colors.grey.shade300)),
-              color: Colors.grey.shade50,
-            ),
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  width: double.infinity,
-                  color: Colors.grey.shade200,
-                  child: const Text(
-                    'Historial de Sesión',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: state.history.length,
-                    itemBuilder: (context, index) {
-                      final record = state.history[index];
-                      return ListTile(
-                        title: Text('DNI: ${record.identity.dni}'),
-                        subtitle: Text(
-                          '${record.identity.apellido}\n${record.type == DniType.oldVersion ? "Viejo (PDF417)" : "Nuevo (QR)"}',
-                        ),
-                        isThreeLine: true,
-                        onTap: () {
-                          context.read<AppState>().loadRecordFromHistory(
-                            record,
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          context.read<AppState>().saveSession();
-                        },
-                        icon: const Icon(Icons.save),
-                        label: const Text('Guardar Sesión'),
-                      ),
-                      const SizedBox(height: 8),
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          context.read<AppState>().loadSession();
-                        },
-                        icon: const Icon(Icons.folder_open),
-                        label: const Text('Cargar Sesión'),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+          const HistorySidebar(),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -472,3 +444,252 @@ class ThousandsSeparatorInputFormatter extends TextInputFormatter {
     );
   }
 }
+
+class HistorySidebar extends StatefulWidget {
+  const HistorySidebar({super.key});
+
+  @override
+  State<HistorySidebar> createState() => _HistorySidebarState();
+}
+
+class _HistorySidebarState extends State<HistorySidebar> {
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleLoadSession(BuildContext context) async {
+    final appState = context.read<AppState>();
+    final loadedRecords = await appState.pickAndParseSessionFile();
+    if (loadedRecords == null || loadedRecords.isEmpty) {
+      return;
+    }
+
+    if (!context.mounted) return;
+
+    if (appState.history.isEmpty) {
+      appState.importRecords(loadedRecords, replace: false);
+      return;
+    }
+
+    final choice = await showDialog<_LoadSessionAction>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Cargar Sesión'),
+        content: Text(
+          'El historial actual contiene ${appState.history.length} registro(s).\n\n'
+          '¿Deseas reemplazar el historial existente o agregar los ${loadedRecords.length} nuevos registro(s)?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(_LoadSessionAction.cancel),
+            child: const Text('Cancelar'),
+          ),
+          OutlinedButton(
+            onPressed: () => Navigator.of(ctx).pop(_LoadSessionAction.replace),
+            child: const Text('Reemplazar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(_LoadSessionAction.append),
+            child: const Text('Agregar'),
+          ),
+        ],
+      ),
+    );
+
+    if (choice == _LoadSessionAction.replace) {
+      appState.importRecords(loadedRecords, replace: true);
+    } else if (choice == _LoadSessionAction.append) {
+      appState.importRecords(loadedRecords, replace: false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<AppState>();
+    final filteredHistory = state.filteredHistory;
+
+    return Container(
+      width: 280,
+      decoration: BoxDecoration(
+        border: Border(right: BorderSide(color: Colors.grey.shade300)),
+        color: Colors.grey.shade50,
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            width: double.infinity,
+            color: Colors.grey.shade200,
+            child: Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    'Historial de Sesión',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                ),
+                if (state.history.isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      state.searchQuery.isNotEmpty
+                          ? '${filteredHistory.length}/${state.history.length}'
+                          : '${state.history.length}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 6),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Buscar en historial...',
+                hintStyle: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+                prefixIcon: const Icon(Icons.search, size: 20),
+                suffixIcon: state.searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, size: 18),
+                        splashRadius: 16,
+                        tooltip: 'Limpiar búsqueda',
+                        onPressed: () {
+                          _searchController.clear();
+                          context.read<AppState>().setSearchQuery('');
+                        },
+                      )
+                    : null,
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+                ),
+              ),
+              onChanged: (value) {
+                context.read<AppState>().setSearchQuery(value);
+              },
+            ),
+          ),
+          Expanded(
+            child: state.history.isEmpty
+                ? const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Text(
+                        'No hay registros en el historial',
+                        style: TextStyle(color: Colors.grey, fontSize: 13),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  )
+                : filteredHistory.isEmpty
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.search_off, size: 36, color: Colors.grey.shade400),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Sin resultados para\n"${state.searchQuery}"',
+                                style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : ListView.separated(
+                        itemCount: filteredHistory.length,
+                        separatorBuilder: (context, index) => Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: Colors.grey.shade200,
+                        ),
+                        itemBuilder: (context, index) {
+                          final record = filteredHistory[index];
+                          final isSelected = state.currentIdentity?.tramiteId ==
+                                  record.identity.tramiteId &&
+                              state.currentIdentity?.dni == record.identity.dni;
+
+                          return ListTile(
+                            selected: isSelected,
+                            selectedTileColor: Theme.of(context)
+                                .colorScheme
+                                .primaryContainer
+                                .withValues(alpha: 0.35),
+                            dense: true,
+                            title: Text(
+                              'DNI: ${record.identity.dni}',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Text(
+                              '${record.identity.apellido}, ${record.identity.nombre}\n${record.type == DniType.oldVersion ? "Viejo (PDF417)" : "Nuevo (QR)"}',
+                            ),
+                            isThreeLine: true,
+                            onTap: () {
+                              context.read<AppState>().loadRecordFromHistory(
+                                record,
+                              );
+                            },
+                          );
+                        },
+                      ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    context.read<AppState>().saveSession();
+                  },
+                  icon: const Icon(Icons.save),
+                  label: const Text('Guardar Sesión'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    _handleLoadSession(context);
+                  },
+                  icon: const Icon(Icons.folder_open),
+                  label: const Text('Cargar Sesión'),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+enum _LoadSessionAction { cancel, replace, append }
+
+
