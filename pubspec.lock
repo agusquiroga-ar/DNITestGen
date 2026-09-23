@@ -17,22 +17,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.13.1"
-  barcode:
-    dependency: transitive
-    description:
-      name: barcode
-      sha256: "7b6729c37e3b7f34233e2318d866e8c48ddb46c1f7ad01ff7bb2a8de1da2b9f4"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.2.9"
-  barcode_widget:
-    dependency: "direct main"
-    description:
-      name: barcode_widget
-      sha256: "6f2c5b08659b1a5f4d88d183e6007133ea2f96e50e7b8bb628f03266c3931427"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.4"
   boolean_selector:
     dependency: transitive
     description:
@@ -49,6 +33,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.1"
+  charset:
+    dependency: transitive
+    description:
+      name: charset
+      sha256: "27802032a581e01ac565904ece8c8962564b1070690794f0072f6865958ce8b9"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.1"
   clock:
     dependency: transitive
     description:
@@ -412,6 +404,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.6.1"
+  zxing_lib:
+    dependency: transitive
+    description:
+      name: zxing_lib
+      sha256: f9170470b6bc947d21a6783486f88ef48aad66fc1380c8acd02b118418ec0ce0
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.4"
+  zxing_widget:
+    dependency: "direct main"
+    description:
+      name: zxing_widget
+      sha256: "21bf84e4cd8b307e32a4c246832da273dcbfcfcad3510a06bfdc6899494dd4be"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
 sdks:
   dart: ">=3.11.5 <4.0.0"
   flutter: ">=3.38.0"

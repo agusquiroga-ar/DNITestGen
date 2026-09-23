@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:barcode_widget/barcode_widget.dart';
+import 'package:zxing_widget/zxing_widget.dart';
 import '../models/identity.dart';
 
 class OldDniGenerator {
@@ -24,17 +24,16 @@ class OldDniGenerator {
 
   /// Retorna un widget que renderiza gráficamente el código PDF417
   static Widget buildBarcodeWidget(String data) {
-    return BarcodeWidget(
-      barcode: Barcode.pdf417(
-        securityLevel: Pdf417SecurityLevel
-            .level4, // Nivel alto para documentos de identidad
-        moduleHeight: 4.0, // Relación de aspecto para barras alargadas
-      ),
-      data: data,
-      errorBuilder: (context, error) => Center(child: Text(error)),
-      width: 500,
-      height: 100,
-      drawText: false,
-    );
+    try {
+      return BarcodeWidget(
+        PDF417Painter(
+          data,
+          errorCorrectionLevel: 4, // Nivel alto para documentos de identidad
+        ),
+        size: const Size(500, 100),
+      );
+    } catch (e) {
+      return Center(child: Text('$e'));
+    }
   }
 }
