@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dni_test_gen/models/identity.dart';
 import 'package:dni_test_gen/generators/pdf417_polycarbonate_generator.dart';
-import 'package:barcode_widget/barcode_widget.dart';
+import 'package:zxing_widget/zxing_widget.dart';
 
 void main() {
   group('Pdf417PolycarbonateGenerator Tests', () {

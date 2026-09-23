@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:barcode_widget/barcode_widget.dart';
+import 'package:zxing_widget/zxing_widget.dart';
 import '../models/identity.dart';
 
 /// Genera el payload del PDF417 del DNI de policarbonato / electrónico.
@@ -35,23 +35,21 @@ class Pdf417PolycarbonateGenerator {
 
   /// Retorna un widget que renderiza gráficamente el código PDF417
   static Widget buildBarcodeWidget(String data) {
-    return BarcodeWidget(
-      barcode: Barcode.pdf417(
-        // Corrección de errores alta para mejorar la lectura
-        securityLevel: Pdf417SecurityLevel.level6,
-        moduleHeight: 4.0,
-      ),
-      data: data,
-      errorBuilder: (context, error) => Center(child: Text(error)),
-      backgroundColor: Colors.white,
-      // Zona de silencio (quiet zone) real en los 4 bordes: sin ella los
-      // lectores de PDF417 fallan al ubicar los patrones de inicio/fin,
-      // sobre todo arriba y abajo, donde el ajuste automático al tamaño
-      // del widget puede dejar las barras pegadas al borde.
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-      width: 500,
-      height: 180,
-      drawText: false,
-    );
+    try {
+      return BarcodeWidget(
+        PDF417Painter(
+          data,
+          // Corrección de errores alta para mejorar la lectura
+          errorCorrectionLevel: 6,
+          // Zona de silencio (quiet zone) real en los 4 bordes: sin ella los
+          // lectores de PDF417 fallan al ubicar los patrones de inicio/fin.
+          padding: 20,
+          backgroundColor: Colors.white,
+        ),
+        size: const Size(500, 180),
+      );
+    } catch (e) {
+      return Center(child: Text('$e'));
+    }
   }
 }
