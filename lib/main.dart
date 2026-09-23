@@ -12,6 +12,8 @@ import 'generators/new_dni_generator.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
+import 'package:printing/printing.dart';
+import 'services/pdf_export_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -507,6 +509,24 @@ class _HistorySidebarState extends State<HistorySidebar> {
     }
   }
 
+  Future<void> _handlePrint(BuildContext context) async {
+    final appState = context.read<AppState>();
+    final records = appState.history;
+    if (records.isEmpty) return;
+
+    try {
+      await Printing.layoutPdf(
+        onLayout: (_) => PdfExportService.buildHistoryPdf(records),
+        name: 'dni_codigos_generados.pdf',
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al generar el PDF: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
@@ -666,6 +686,14 @@ class _HistorySidebarState extends State<HistorySidebar> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                OutlinedButton.icon(
+                  onPressed: state.history.isEmpty
+                      ? null
+                      : () => _handlePrint(context),
+                  icon: const Icon(Icons.print),
+                  label: const Text('Imprimir'),
+                ),
+                const SizedBox(height: 8),
                 ElevatedButton.icon(
                   onPressed: () {
                     context.read<AppState>().saveSession();

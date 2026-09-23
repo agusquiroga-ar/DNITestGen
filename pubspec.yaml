@@ -39,6 +39,8 @@ dependencies:
   intl: ^0.20.2
   qr_flutter: ^4.1.0
   file_picker: ^11.0.2
+  pdf: ^3.11.3
+  printing: ^5.14.2
 
 dev_dependencies:
   flutter_test:
@@ -68,6 +70,8 @@ flutter:
   assets:
     - assets/names.json
     - assets/surnames.json
+    - assets/fonts/NotoSans-Regular.ttf
+    - assets/fonts/NotoSans-Bold.ttf
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
