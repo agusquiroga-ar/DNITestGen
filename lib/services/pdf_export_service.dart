@@ -4,6 +4,9 @@ import 'package:barcode/barcode.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:zxing_lib/common.dart' as zx;
+import 'package:zxing_lib/pdf417.dart' as zx;
+import 'package:zxing_lib/zxing.dart' as zx;
 
 import '../generators/edni_qr_generator.dart';
 import '../generators/pdf417_classic_generator.dart';
@@ -89,10 +92,6 @@ class PdfExportService {
         break;
     }
 
-    final barcode = isQr
-        ? Barcode.qrCode(errorCorrectLevel: BarcodeQRCorrectionLevel.medium)
-        : Barcode.pdf417(securityLevel: Pdf417SecurityLevel.level6);
-
     return pw.Container(
       padding: const pw.EdgeInsets.all(4),
       decoration: pw.BoxDecoration(
@@ -105,23 +104,19 @@ class PdfExportService {
         children: [
           pw.Expanded(
             child: pw.Center(
-              child: pw.BarcodeWidget(
-                barcode: barcode,
-                data: data,
-                drawText: false,
-                backgroundColor: PdfColors.white,
-                // Zona de silencio real en los 4 bordes: sin ella el PDF417
-                // impreso pierde los márgenes que el lector necesita para
-                // ubicar los patrones de inicio/fin.
-                padding: isQr
-                    ? const pw.EdgeInsets.all(2)
-                    : const pw.EdgeInsets.symmetric(
-                        horizontal: 4,
-                        vertical: 6,
+              child: isQr
+                  ? pw.BarcodeWidget(
+                      barcode: Barcode.qrCode(
+                        errorCorrectLevel: BarcodeQRCorrectionLevel.medium,
                       ),
-                width: isQr ? 78 : 116,
-                height: isQr ? 78 : 46,
-              ),
+                      data: data,
+                      drawText: false,
+                      backgroundColor: PdfColors.white,
+                      padding: const pw.EdgeInsets.all(2),
+                      width: 78,
+                      height: 78,
+                    )
+                  : _buildPdf417(data, width: 116, height: 46),
             ),
           ),
           pw.SizedBox(height: 3),
@@ -143,6 +138,74 @@ class PdfExportService {
           ),
         ],
       ),
+    );
+  }
+
+  /// Dibuja un PDF417 como vector a partir de la matriz de ZXing, el mismo
+  /// encoder que usa la vista en pantalla (zxing_widget), para que el código
+  /// impreso sea idéntico al que se muestra y se lea igual de bien.
+  static pw.Widget _buildPdf417(
+    String data, {
+    required double width,
+    required double height,
+  }) {
+    final zx.BitMatrix matrix;
+    try {
+      matrix = zx.PDF417Writer().encode(
+        data,
+        zx.BarcodeFormat.pdf417,
+        1,
+        1,
+        // Corrección de errores alta, igual que en pantalla. La matriz va
+        // sin margen porque la zona de silencio la agrega el padding.
+        zx.EncodeHint(errorCorrection: 6, margin: 0),
+      );
+    } catch (e) {
+      return pw.Text('$e', style: const pw.TextStyle(fontSize: 5));
+    }
+
+    // Zona de silencio real en los 4 bordes: sin ella el PDF417 impreso
+    // pierde los márgenes que el lector necesita para ubicar los patrones
+    // de inicio/fin.
+    const padX = 4.0;
+    const padY = 6.0;
+
+    return pw.CustomPaint(
+      size: PdfPoint(width, height),
+      painter: (canvas, size) {
+        canvas
+          ..setFillColor(PdfColors.white)
+          ..drawRect(0, 0, size.x, size.y)
+          ..fillPath();
+
+        final moduleW = (size.x - padX * 2) / matrix.width;
+        final moduleH = (size.y - padY * 2) / matrix.height;
+
+        canvas.setFillColor(PdfColors.black);
+        for (var y = 0; y < matrix.height; y++) {
+          // El origen del PDF está abajo a la izquierda: se invierte Y.
+          final bottom = size.y - padY - (y + 1) * moduleH;
+          var x = 0;
+          while (x < matrix.width) {
+            if (!matrix.get(x, y)) {
+              x++;
+              continue;
+            }
+            // Agrupa módulos negros contiguos en un solo rectángulo.
+            final start = x;
+            while (x < matrix.width && matrix.get(x, y)) {
+              x++;
+            }
+            canvas.drawRect(
+              padX + start * moduleW,
+              bottom,
+              (x - start) * moduleW,
+              moduleH,
+            );
+          }
+        }
+        canvas.fillPath();
+      },
     );
   }
 
