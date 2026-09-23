@@ -27,13 +27,19 @@ class Pdf417ClassicGenerator {
     return BarcodeWidget(
       barcode: Barcode.pdf417(
         securityLevel: Pdf417SecurityLevel
-            .level4, // Nivel alto para documentos de identidad
+            .level6, // Corrección de errores alta para mejorar la lectura
         moduleHeight: 4.0, // Relación de aspecto para barras alargadas
       ),
       data: data,
       errorBuilder: (context, error) => Center(child: Text(error)),
+      backgroundColor: Colors.white,
+      // Zona de silencio (quiet zone) real en los 4 bordes: sin ella los
+      // lectores de PDF417 fallan al ubicar los patrones de inicio/fin,
+      // sobre todo arriba y abajo, donde el ajuste automático al tamaño
+      // del widget puede dejar las barras pegadas al borde.
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       width: 500,
-      height: 100,
+      height: 160,
       drawText: false,
     );
   }

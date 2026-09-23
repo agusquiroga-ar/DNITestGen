@@ -91,7 +91,7 @@ class PdfExportService {
 
     final barcode = isQr
         ? Barcode.qrCode(errorCorrectLevel: BarcodeQRCorrectionLevel.medium)
-        : Barcode.pdf417(securityLevel: Pdf417SecurityLevel.level4);
+        : Barcode.pdf417(securityLevel: Pdf417SecurityLevel.level6);
 
     return pw.Container(
       padding: const pw.EdgeInsets.all(4),
@@ -109,8 +109,18 @@ class PdfExportService {
                 barcode: barcode,
                 data: data,
                 drawText: false,
-                width: isQr ? 78 : 110,
-                height: isQr ? 78 : 30,
+                backgroundColor: PdfColors.white,
+                // Zona de silencio real en los 4 bordes: sin ella el PDF417
+                // impreso pierde los márgenes que el lector necesita para
+                // ubicar los patrones de inicio/fin.
+                padding: isQr
+                    ? const pw.EdgeInsets.all(2)
+                    : const pw.EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 6,
+                      ),
+                width: isQr ? 78 : 116,
+                height: isQr ? 78 : 46,
               ),
             ),
           ),
