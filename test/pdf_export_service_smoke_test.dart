@@ -20,7 +20,7 @@ void main() {
           fechaNacimiento: DateTime(1990, 1, 1 + (i % 27)),
           fechaEmision: DateTime(2020, 1, 1 + (i % 27)),
         ),
-        type: i.isEven ? DniType.oldVersion : DniType.newVersion,
+        type: i.isEven ? DniType.pdf417Classic : DniType.edniQr,
         generatedAt: DateTime.now(),
       );
     });

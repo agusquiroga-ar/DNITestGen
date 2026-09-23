@@ -22,7 +22,7 @@ void main() {
 
     final record1 = GeneratedCodeRecord(
       identity: identity1,
-      type: DniType.newVersion,
+      type: DniType.edniQr,
       generatedAt: DateTime(2023, 1, 1),
     );
 
@@ -39,7 +39,7 @@ void main() {
 
     final record2 = GeneratedCodeRecord(
       identity: identity2,
-      type: DniType.oldVersion,
+      type: DniType.pdf417Classic,
       generatedAt: DateTime(2023, 1, 2),
     );
 
@@ -171,7 +171,7 @@ void main() {
         fechaNacimiento: DateTime(1990, 1, 1),
         fechaEmision: DateTime(2020, 1, 1),
       ),
-      type: DniType.newVersion,
+      type: DniType.edniQr,
       generatedAt: DateTime.now(),
     );
 
@@ -186,7 +186,7 @@ void main() {
         fechaNacimiento: DateTime(1995, 2, 2),
         fechaEmision: DateTime(2021, 2, 2),
       ),
-      type: DniType.oldVersion,
+      type: DniType.pdf417Classic,
       generatedAt: DateTime.now(),
     );
 

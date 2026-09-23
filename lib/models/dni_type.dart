@@ -1,1 +1,1 @@
-enum DniType { oldVersion, newVersion, random }
+enum DniType { edniQr, pdf417Classic, pdf417Polycarbonate, random }

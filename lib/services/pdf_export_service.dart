@@ -5,8 +5,9 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
-import '../generators/new_dni_generator.dart';
-import '../generators/old_dni_generator.dart';
+import '../generators/edni_qr_generator.dart';
+import '../generators/pdf417_classic_generator.dart';
+import '../generators/pdf417_polycarbonate_generator.dart';
 import '../models/dni_type.dart';
 import '../models/generated_code_record.dart';
 
@@ -72,15 +73,25 @@ class PdfExportService {
 
   static pw.Widget _buildCell(GeneratedCodeRecord record) {
     final identity = record.identity;
-    final isOld = record.type == DniType.oldVersion;
+    final isQr = record.type == DniType.edniQr;
 
-    final data = isOld
-        ? OldDniGenerator.generateString(identity)
-        : NewDniGenerator.generateString(identity);
+    final String data;
+    switch (record.type) {
+      case DniType.pdf417Classic:
+        data = Pdf417ClassicGenerator.generateString(identity);
+        break;
+      case DniType.pdf417Polycarbonate:
+        data = Pdf417PolycarbonateGenerator.generateString(identity);
+        break;
+      case DniType.edniQr:
+      case DniType.random:
+        data = EdniQrGenerator.generateString(identity);
+        break;
+    }
 
-    final barcode = isOld
-        ? Barcode.pdf417(securityLevel: Pdf417SecurityLevel.level4)
-        : Barcode.qrCode(errorCorrectLevel: BarcodeQRCorrectionLevel.medium);
+    final barcode = isQr
+        ? Barcode.qrCode(errorCorrectLevel: BarcodeQRCorrectionLevel.medium)
+        : Barcode.pdf417(securityLevel: Pdf417SecurityLevel.level4);
 
     return pw.Container(
       padding: const pw.EdgeInsets.all(4),
@@ -98,8 +109,8 @@ class PdfExportService {
                 barcode: barcode,
                 data: data,
                 drawText: false,
-                width: isOld ? 110 : 78,
-                height: isOld ? 30 : 78,
+                width: isQr ? 78 : 110,
+                height: isQr ? 78 : 30,
               ),
             ),
           ),
@@ -117,11 +128,24 @@ class PdfExportService {
             overflow: pw.TextOverflow.clip,
           ),
           pw.Text(
-            isOld ? 'PDF417' : 'QR',
+            _pdfTypeLabel(record.type),
             style: const pw.TextStyle(fontSize: 5.5, color: PdfColors.grey600),
           ),
         ],
       ),
     );
+  }
+
+  static String _pdfTypeLabel(DniType type) {
+    switch (type) {
+      case DniType.edniQr:
+        return 'QR';
+      case DniType.pdf417Classic:
+        return 'PDF417 Clásico';
+      case DniType.pdf417Polycarbonate:
+        return 'PDF417 Policarbonato';
+      case DniType.random:
+        return '';
+    }
   }
 }

@@ -7,13 +7,28 @@ import 'services/data_generator_service.dart';
 import 'models/identity.dart';
 import 'models/dni_type.dart';
 import 'models/generated_code_record.dart';
-import 'generators/old_dni_generator.dart';
-import 'generators/new_dni_generator.dart';
+import 'generators/edni_qr_generator.dart';
+import 'generators/pdf417_classic_generator.dart';
+import 'generators/pdf417_polycarbonate_generator.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:printing/printing.dart';
 import 'services/pdf_export_service.dart';
+
+String _formatLabel(DniType? type) {
+  switch (type) {
+    case DniType.edniQr:
+      return 'eDNI Nuevo (QR)';
+    case DniType.pdf417Classic:
+      return 'DNI Físico Clásico (PDF417)';
+    case DniType.pdf417Polycarbonate:
+      return 'DNI Policarbonato (PDF417)';
+    case DniType.random:
+    case null:
+      return 'Aleatorio';
+  }
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -105,18 +120,18 @@ class AppState extends ChangeNotifier {
 
       var typeToGenerate = _selectedType;
       if (typeToGenerate == DniType.random) {
-        typeToGenerate = Random().nextBool()
-            ? DniType.oldVersion
-            : DniType.newVersion;
+        const options = [
+          DniType.edniQr,
+          DniType.pdf417Classic,
+          DniType.pdf417Polycarbonate,
+        ];
+        typeToGenerate = options[Random().nextInt(options.length)];
       }
 
-      if (typeToGenerate == DniType.oldVersion) {
-        final data = OldDniGenerator.generateString(_currentIdentity!);
-        _currentGeneratedWidget = OldDniGenerator.buildBarcodeWidget(data);
-      } else {
-        final data = NewDniGenerator.generateString(_currentIdentity!);
-        _currentGeneratedWidget = NewDniGenerator.buildQrWidget(data);
-      }
+      _currentGeneratedWidget = _buildWidgetForType(
+        typeToGenerate,
+        _currentIdentity!,
+      );
 
       _lastGeneratedType = typeToGenerate;
 
@@ -137,16 +152,24 @@ class AppState extends ChangeNotifier {
   void loadRecordFromHistory(GeneratedCodeRecord record) {
     _currentIdentity = record.identity;
     _lastGeneratedType = record.type;
-
-    if (record.type == DniType.oldVersion) {
-      final data = OldDniGenerator.generateString(record.identity);
-      _currentGeneratedWidget = OldDniGenerator.buildBarcodeWidget(data);
-    } else {
-      final data = NewDniGenerator.generateString(record.identity);
-      _currentGeneratedWidget = NewDniGenerator.buildQrWidget(data);
-    }
+    _currentGeneratedWidget = _buildWidgetForType(record.type, record.identity);
 
     notifyListeners();
+  }
+
+  static Widget _buildWidgetForType(DniType type, Identity identity) {
+    switch (type) {
+      case DniType.pdf417Classic:
+        final data = Pdf417ClassicGenerator.generateString(identity);
+        return Pdf417ClassicGenerator.buildBarcodeWidget(data);
+      case DniType.pdf417Polycarbonate:
+        final data = Pdf417PolycarbonateGenerator.generateString(identity);
+        return Pdf417PolycarbonateGenerator.buildBarcodeWidget(data);
+      case DniType.edniQr:
+      case DniType.random:
+        final data = EdniQrGenerator.generateString(identity);
+        return EdniQrGenerator.buildQrWidget(data);
+    }
   }
 
   Future<void> saveSession() async {
@@ -263,12 +286,16 @@ class MainScreen extends StatelessWidget {
                     ),
                     items: const [
                       DropdownMenuItem(
-                        value: DniType.oldVersion,
-                        child: Text('Versión Vieja (PDF417)'),
+                        value: DniType.edniQr,
+                        child: Text('eDNI Nuevo (QR)'),
                       ),
                       DropdownMenuItem(
-                        value: DniType.newVersion,
-                        child: Text('Versión Nueva (QR)'),
+                        value: DniType.pdf417Classic,
+                        child: Text('DNI Físico Clásico (PDF417)'),
+                      ),
+                      DropdownMenuItem(
+                        value: DniType.pdf417Polycarbonate,
+                        child: Text('DNI Policarbonato (PDF417)'),
                       ),
                       DropdownMenuItem(
                         value: DniType.random,
@@ -374,10 +401,7 @@ class MainScreen extends StatelessWidget {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    state.lastGeneratedType ==
-                                            DniType.oldVersion
-                                        ? 'Formato: DNI Viejo (PDF417)'
-                                        : 'Formato: Nuevo eDNI (QR)',
+                                    'Formato: ${_formatLabel(state.lastGeneratedType)}',
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -669,7 +693,7 @@ class _HistorySidebarState extends State<HistorySidebar> {
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             subtitle: Text(
-                              '${record.identity.apellido}, ${record.identity.nombre}\n${record.type == DniType.oldVersion ? "Viejo (PDF417)" : "Nuevo (QR)"}',
+                              '${record.identity.apellido}, ${record.identity.nombre}\n${_formatLabel(record.type)}',
                             ),
                             isThreeLine: true,
                             onTap: () {

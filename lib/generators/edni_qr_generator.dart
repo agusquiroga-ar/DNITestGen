@@ -4,35 +4,36 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:intl/intl.dart';
 import '../models/identity.dart';
 
-class NewDniGenerator {
-  /// Genera el payload estructurado con delimitadores '@' para el código QR del nuevo eDNI.
+/// Genera el payload del QR del eDNI nuevo:
+/// TRAMITE@APELLIDO@NOMBRE@DNI@EJEMPLAR@FEC_NAC@FEC_EMISION@JWT
+class EdniQrGenerator {
   static String generateString(Identity identity) {
     final tramiteId = identity.tramiteId;
-    
+
     // Validación estricta del número de trámite (suele rellenarse con ceros a la izq hasta 11)
     if (tramiteId.length != 11 || int.tryParse(tramiteId) == null) {
-      throw ArgumentError('El número de trámite (id) para el nuevo DNI electrónico debe ser exactamente de 11 dígitos numéricos.');
+      throw ArgumentError('El número de trámite (id) para el eDNI debe ser exactamente de 11 dígitos numéricos.');
     }
 
     final apellido = identity.apellido.toUpperCase();
     final nombre = identity.nombre.toUpperCase();
     final dni = identity.dni.toString();
     final ejemplar = identity.ejemplar;
-    
-    final dateFormat = DateFormat('dd/MM/yy');
+
+    final dateFormat = DateFormat('dd/MM/yyyy');
     final fechaNac = dateFormat.format(identity.fechaNacimiento);
     final fechaEmi = dateFormat.format(identity.fechaEmision);
 
     // Generar un JWT simulado para desarrollo, en base al id del trámite, sin usar el algoritmo ni ejemplos reales.
     final header = base64Url.encode(utf8.encode('{"typ":"JWT","alg":"HS256"}')).replaceAll('=', '');
-    
+
     // El payload inserta dinámicamente el id del trámite actual (sin ceros)
     final tramiteSinCeros = int.parse(tramiteId).toString();
     final payload = base64Url.encode(utf8.encode('{"id_tramite":"$tramiteSinCeros"}')).replaceAll('=', '');
-    
+
     // Firma simulada genérica
     final dummySignature = "ABCDEFGHIJabcdefghij0123456789ABCDEFGHIJabcdefghij0123456789ABCDEFGHIJabcdefghij0123456789ABCDEFGHIJabcdefghij0123456789ABCDEFGHIJabcdefghij0123456789ABCDEFGHIJabcdefghij0123456789ABCDEFGHIJabcdefghij0123456789ABCDEFGHIJabcdefghij0123456789";
-    
+
     final jwt = "$header.$payload.$dummySignature";
 
     return '$tramiteId@$apellido@$nombre@$dni@$ejemplar@$fechaNac@$fechaEmi@$jwt';

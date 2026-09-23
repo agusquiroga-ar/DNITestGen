@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dni_test_gen/models/identity.dart';
-import 'package:dni_test_gen/generators/old_dni_generator.dart';
+import 'package:dni_test_gen/generators/pdf417_classic_generator.dart';
 import 'package:barcode_widget/barcode_widget.dart';
 
 void main() {
-  group('Feature 04: OldDniGenerator Tests', () {
+  group('Pdf417ClassicGenerator Tests', () {
     final identity = Identity(
       nombre: 'Juan carlos',
       apellido: 'Perez',
@@ -18,37 +18,40 @@ void main() {
     );
 
     test('generateString returns 9 fields separated by @', () {
-      final result = OldDniGenerator.generateString(identity);
+      final result = Pdf417ClassicGenerator.generateString(identity);
       final parts = result.split('@');
-      
+
       expect(parts.length, 9);
     });
 
-    test('generateString formats dates correctly', () {
-      final result = OldDniGenerator.generateString(identity);
+    test('generateString places fields per DNI PDF417 classic layout', () {
+      final result = Pdf417ClassicGenerator.generateString(identity);
       final parts = result.split('@');
-      
-      // Fecha de nacimiento está en el índice 6
-      expect(parts[6], '"15/01/1990"');
-      // Fecha de emisión está en el índice 7
-      expect(parts[7], '"05/10/2022"');
+
+      // TRAMITE@APELLIDO@NOMBRE@SEXO@DNI@EJEMPLAR@FEC_NAC@FEC_EMISION@CONTROL
+      expect(parts[0], '123456789');
+      expect(parts[1], 'PEREZ');
+      expect(parts[2], 'JUAN CARLOS');
+      expect(parts[3], 'M');
+      expect(parts[4], '12345678');
+      expect(parts[5], 'A');
+      expect(parts[6], '15/01/1990');
+      expect(parts[7], '05/10/2022');
     });
 
-    test('generateString converts names to uppercase', () {
-      final result = OldDniGenerator.generateString(identity);
+    test('generateString DNI field is numeric', () {
+      final result = Pdf417ClassicGenerator.generateString(identity);
       final parts = result.split('@');
-      
-      // Apellido índice 1, Nombre índice 2
-      expect(parts[1], '"PEREZ"');
-      expect(parts[2], '"JUAN CARLOS"');
+
+      expect(int.tryParse(parts[4]), isNotNull);
     });
 
     testWidgets('buildBarcodeWidget renders a BarcodeWidget', (WidgetTester tester) async {
-      final data = OldDniGenerator.generateString(identity);
+      final data = Pdf417ClassicGenerator.generateString(identity);
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: OldDniGenerator.buildBarcodeWidget(data),
+          child: Pdf417ClassicGenerator.buildBarcodeWidget(data),
         ),
       );
 

@@ -37,40 +37,58 @@ void main() {
       expect(find.textContaining('Nombre: Perez, Juan'), findsOneWidget);
     });
 
-    testWidgets('Selecting Versión Nueva creates QR', (WidgetTester tester) async {
+    testWidgets('Selecting eDNI Nuevo creates QR', (WidgetTester tester) async {
       await tester.pumpWidget(DniGeneratorApp(dataService: mockService));
 
       final dropdown = find.byType(DropdownButtonFormField<DniType>);
       await tester.tap(dropdown);
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Versión Nueva (QR)').last);
+      await tester.tap(find.text('eDNI Nuevo (QR)').last);
       await tester.pumpAndSettle();
 
       final button = find.widgetWithText(ElevatedButton, 'Generar');
       await tester.tap(button);
       await tester.pumpAndSettle();
 
-      expect(find.text('Formato: Nuevo eDNI (QR)'), findsOneWidget);
+      expect(find.text('Formato: eDNI Nuevo (QR)'), findsOneWidget);
       // El QR widget de qr_flutter debería estar en el árbol
       // (No podemos chequear `QrImageView` tan fácil sin importarlo, pero podemos confiar en que cambia el texto)
     });
 
-    testWidgets('Selecting Versión Vieja creates PDF417', (WidgetTester tester) async {
+    testWidgets('Selecting DNI Físico Clásico creates PDF417', (WidgetTester tester) async {
       await tester.pumpWidget(DniGeneratorApp(dataService: mockService));
 
       final dropdown = find.byType(DropdownButtonFormField<DniType>);
       await tester.tap(dropdown);
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Versión Vieja (PDF417)').last);
+      await tester.tap(find.text('DNI Físico Clásico (PDF417)').last);
       await tester.pumpAndSettle();
 
       final button = find.widgetWithText(ElevatedButton, 'Generar');
       await tester.tap(button);
       await tester.pumpAndSettle();
 
-      expect(find.text('Formato: DNI Viejo (PDF417)'), findsOneWidget);
+      expect(find.text('Formato: DNI Físico Clásico (PDF417)'), findsOneWidget);
+      // El BarcodeWidget debería estar en el árbol
+    });
+
+    testWidgets('Selecting DNI Policarbonato creates PDF417', (WidgetTester tester) async {
+      await tester.pumpWidget(DniGeneratorApp(dataService: mockService));
+
+      final dropdown = find.byType(DropdownButtonFormField<DniType>);
+      await tester.tap(dropdown);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('DNI Policarbonato (PDF417)').last);
+      await tester.pumpAndSettle();
+
+      final button = find.widgetWithText(ElevatedButton, 'Generar');
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Formato: DNI Policarbonato (PDF417)'), findsOneWidget);
       // El BarcodeWidget debería estar en el árbol
     });
   });

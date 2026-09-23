@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dni_test_gen/models/identity.dart';
-import 'package:dni_test_gen/generators/new_dni_generator.dart';
+import 'package:dni_test_gen/generators/edni_qr_generator.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 void main() {
-  group('Feature 05: NewDniGenerator Tests', () {
+  group('EdniQrGenerator Tests', () {
     final validIdentity = Identity(
       nombre: 'Juan',
       apellido: 'Perez',
@@ -17,14 +17,18 @@ void main() {
       fechaEmision: DateTime(2023, 2, 28),
     );
 
-    test('generateString builds correct formatted string', () {
-      final data = NewDniGenerator.generateString(validIdentity);
-      
-      // Debe contener el inicio de los campos concatenados con @
-      expect(data, startsWith('00123456789@PEREZ@JUAN@12345678@B@01/01/90@28/02/23@'));
-      
-      // Y debe terminar en una firma base64 o partes de JWT
-      expect(data.split('@').length, equals(8)); 
+    test('generateString builds correct formatted string with 8 fields', () {
+      final data = EdniQrGenerator.generateString(validIdentity);
+
+      expect(data, startsWith('00123456789@PEREZ@JUAN@12345678@B@01/01/1990@28/02/2023@'));
+      expect(data.split('@').length, equals(8));
+    });
+
+    test('generateString last field looks like a JWT', () {
+      final data = EdniQrGenerator.generateString(validIdentity);
+      final jwt = data.split('@').last;
+
+      expect(jwt.split('.').length, equals(3));
     });
 
     test('generateString throws if tramiteId does not have 11 digits', () {
@@ -34,20 +38,20 @@ void main() {
         sexo: 'M',
         dni: 12345678,
         ejemplar: 'A',
-        tramiteId: '123456789', // 9 dígitos, Inválido ahora
+        tramiteId: '123456789', // 9 dígitos, inválido
         fechaNacimiento: DateTime(1990, 1, 1),
         fechaEmision: DateTime.now(),
       );
 
-      expect(() => NewDniGenerator.generateString(invalidIdentity), throwsArgumentError);
+      expect(() => EdniQrGenerator.generateString(invalidIdentity), throwsArgumentError);
     });
 
     testWidgets('buildQrWidget renders a QrImageView', (WidgetTester tester) async {
-      final data = NewDniGenerator.generateString(validIdentity);
+      final data = EdniQrGenerator.generateString(validIdentity);
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: NewDniGenerator.buildQrWidget(data),
+          child: EdniQrGenerator.buildQrWidget(data),
         ),
       );
 

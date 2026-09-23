@@ -23,9 +23,22 @@ class GeneratedCodeRecord {
   factory GeneratedCodeRecord.fromJson(Map<String, dynamic> json) {
     return GeneratedCodeRecord(
       identity: Identity.fromJson(json['identity'] as Map<String, dynamic>),
-      type: DniType.values.byName(json['type'] as String),
+      type: _typeFromJson(json['type'] as String),
       generatedAt: DateTime.parse(json['generatedAt'] as String),
     );
+  }
+
+  // Compatibilidad con sesiones exportadas antes de que se reemplazaran los
+  // formatos "oldVersion"/"newVersion" por los 3 formatos DNI documentados.
+  static DniType _typeFromJson(String name) {
+    switch (name) {
+      case 'oldVersion':
+        return DniType.pdf417Classic;
+      case 'newVersion':
+        return DniType.edniQr;
+      default:
+        return DniType.values.byName(name);
+    }
   }
 
   bool matchesSearch(String query) {
@@ -55,9 +68,14 @@ class GeneratedCodeRecord {
         ? 'masculino varon'
         : (identity.sexo.toUpperCase() == 'F' ? 'femenino mujer' : 'no binario x');
 
-    final typeLabel = type == DniType.oldVersion
-        ? 'viejo pdf417 version vieja codigo de barras barras'
-        : 'nuevo qr version nueva edni digital';
+    final typeLabel = switch (type) {
+      DniType.edniQr => 'nuevo qr version nueva edni digital electronico',
+      DniType.pdf417Classic =>
+        'viejo clasico pdf417 version vieja codigo de barras barras fisico',
+      DniType.pdf417Polycarbonate =>
+        'policarbonato pdf417 electronico tarjeta plastico',
+      DniType.random => '',
+    };
 
     final genDay = generatedAt.day.toString().padLeft(2, '0');
     final genMonth = generatedAt.month.toString().padLeft(2, '0');
